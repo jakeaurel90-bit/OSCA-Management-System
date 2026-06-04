@@ -1,0 +1,42 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Member Logs{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+    <h2 class="text-2xl font-bold text-slate-800 mb-6">Attendance Logs</h2>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
+                    <th class="px-6 py-4 border-b">Senior Citizen Name</th>
+                    <th class="px-6 py-4 border-b">OSCA ID</th>
+                    <th class="px-6 py-4 border-b">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+                {% for log in logs %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-sm font-medium text-slate-900">
+                        {{ log.senior.first_name }} {{ log.senior.last_name }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">
+                        {{ log.senior.osca_id }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">
+                        {{ log.timestamp|date:"F j, Y, g:i a" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-6 py-10 text-center text-slate-500 italic">
+                        No attendance logs recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

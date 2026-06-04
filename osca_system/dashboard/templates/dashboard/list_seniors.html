@@ -1,0 +1,55 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <form method="GET" action="" class="w-full sm:w-80 relative">
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Search via name or OSCA serial code..." class="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400 text-xs"></i>
+        </form>
+        <div class="flex gap-2 w-full sm:w-auto justify-end">
+            <a href="{% url 'dashboard:export_csv' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-700 flex items-center gap-2 shadow-xs transition">
+                <i class="fa-solid fa-file-csv text-sm"></i> Export CSV Dataset
+            </a>
+            <a href="{% url 'dashboard:add_senior' %}" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-blue-700 flex items-center gap-2 shadow-xs transition">
+                <i class="fa-solid fa-plus text-sm"></i> Register Member Profile
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-gray-100">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50/70 border-b border-gray-200 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                    <th class="p-4">Identifer Code</th>
+                    <th class="p-4">Full Member Name</th>
+                    <th class="p-4">Age / Gender</th>
+                    <th class="p-4">Barangay Sector</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-center">Data Controls</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-xs text-gray-600 font-medium">
+                {% for senior in seniors %}
+                <tr class="hover:bg-slate-50/50 transition">
+                    <td class="p-4 font-mono font-bold text-gray-400">{{ senior.id_number|default:"UNASSIGNED PENDING" }}</td>
+                    <td class="p-4 font-bold text-gray-900 text-sm">{{ senior.last_name }}, {{ senior.first_name }}</td>
+                    <td class="p-4">{{ senior.age }} yrs / {{ senior.get_gender_display }}</td>
+                    <td class="p-4 text-gray-500">{{ senior.barangay.name }}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded-md font-bold text-[10px] {% if senior.status == 'ACTIVE' %}bg-emerald-50 text-emerald-700{% else %}bg-rose-50 text-rose-700{% endif %}">
+                            {{ senior.status }}
+                        </span>
+                    </td>
+                    <td class="p-4 flex justify-center gap-3 text-sm">
+                        <a href="{% url 'dashboard:edit_senior' senior.pk %}" title="Modify Profile Record" class="text-blue-600 hover:text-blue-800 transition"><i class="fa-solid fa-user-pen"></i></a>
+                        <a href="{% url 'dashboard:delete_senior' senior.pk %}" onclick="return confirm('Confirm safe deletion execution? This completely wipes profile records history logs.');" title="Purge Record Profile" class="text-rose-600 hover:text-rose-800 transition"><i class="fa-solid fa-user-minus"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="p-8 text-center text-gray-400">No senior registration files matched querying guidelines inside system instance.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

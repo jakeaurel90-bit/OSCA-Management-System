@@ -1,0 +1,34 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
+    <div class="mb-5">
+        <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-blue-600"></i> Regional Demographic Census Breakdown</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Calculated headcount ratios per geographic zone area partitions dynamically.</p>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-gray-100">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase border-b border-gray-200 tracking-wider">
+                    <th class="p-4">Barangay Boundary District</th>
+                    <th class="p-4 text-center">Active Enrollees Pool</th>
+                    <th class="p-4 text-center">Inactive Members Counter</th>
+                    <th class="p-4 text-center">Gross Population Base</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-xs font-semibold text-gray-600">
+                {% for b in barangays %}
+                <tr class="hover:bg-slate-50/50 transition">
+                    <td class="p-4 text-sm font-bold text-gray-900">{{ b.name }}</td>
+                    <td class="p-4 text-center text-emerald-600 bg-emerald-50/20 font-mono">{{ b.active_members }}</td>
+                    <td class="p-4 text-center text-rose-600 bg-rose-50/20 font-mono">{{ b.inactive_members }}</td>
+                    <td class="p-4 text-center text-slate-900 bg-slate-50/60 font-mono font-bold">{{ b.total_members }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="p-8 text-center text-gray-400">No regional zoning metrics files located inside backend entities pool yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

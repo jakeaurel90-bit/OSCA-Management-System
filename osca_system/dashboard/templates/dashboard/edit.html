@@ -1,0 +1,51 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="max-w-xl bg-white p-6 rounded-2xl shadow-xs border border-gray-200 mx-auto">
+    <div class="mb-5 border-b border-gray-100 pb-3">
+        <h2 class="text-lg font-bold text-gray-900">Modify Registered Core Demographics File</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Altering parameters modifies runtime active masterlists dataset elements instantly.</p>
+    </div>
+    
+    <form method="POST" action="{% url 'dashboard:edit_senior' senior.pk %}" class="space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Given First Name</label>
+                <input type="text" name="first_name" value="{{ senior.first_name }}" required class="w-full border border-gray-300 rounded-xl p-2.5 text-xs focus:outline-none focus:border-blue-500 transition">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Family Surname</label>
+                <input type="text" name="last_name" value="{{ senior.last_name }}" required class="w-full border border-gray-300 rounded-xl p-2.5 text-xs focus:outline-none focus:border-blue-500 transition">
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Biological Gender</label>
+                <select name="gender" class="w-full border border-gray-300 rounded-xl p-2.5 text-xs bg-white focus:outline-none focus:border-blue-500 transition">
+                    <option value="M" {% if senior.gender == 'M' %}selected{% endif %}>Male</option>
+                    <option value="F" {% if senior.gender == 'F' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Date of Birth</label>
+                <input type="date" name="birthdate" value="{{ senior.birthdate|date:'Y-m-d' }}" required class="w-full border border-gray-300 rounded-xl p-2.5 text-xs focus:outline-none focus:border-blue-500 transition">
+            </div>
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Barangay Geographic Zone Sector</label>
+            <input type="text" name="barangay" value="{{ senior.barangay.name }}" required class="w-full border border-gray-300 rounded-xl p-2.5 text-xs focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Operational Lifecycle Status</label>
+            <select name="status" class="w-full border border-gray-300 rounded-xl p-2.5 text-xs bg-white focus:outline-none focus:border-blue-500 transition">
+                <option value="ACTIVE" {% if senior.status == 'ACTIVE' %}selected{% endif %}>Active Member</option>
+                <option value="INACTIVE" {% if senior.status == 'INACTIVE' %}selected{% endif %}>Inactive Member</option>
+            </select>
+        </div>
+        <div class="pt-4 flex justify-end gap-2 border-t border-gray-100 mt-6">
+            <a href="{% url 'dashboard:list_seniors' %}" class="px-4 py-2 text-xs font-semibold text-gray-500 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition">Dismiss Changes</a>
+            <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-xs transition cursor-pointer">Save Alterations</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

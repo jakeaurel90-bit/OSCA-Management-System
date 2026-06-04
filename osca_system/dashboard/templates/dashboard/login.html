@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Access Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 flex items-center justify-center h-screen w-screen font-sans">
+
+    <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl border border-gray-100 mx-4">
+        <div class="text-center mb-6">
+            <div class="bg-amber-500 w-12 h-12 rounded-full flex items-center justify-center font-bold text-slate-900 text-lg mx-auto mb-2 shadow-inner">OSCA</div>
+            <h2 class="text-xl font-bold text-gray-900">Portal Gate Entry</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Provide credentials to enter systemic records systems</p>
+        </div>
+
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold p-3 rounded-xl mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation text-sm"></i> {{ msg }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'dashboard:login' %}" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Username Operator Reference</label>
+                <div class="relative">
+                    <input type="text" name="username" required placeholder="Enter active user handle" class="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                    <i class="fa-solid fa-user absolute left-3 top-3.5 text-gray-400 text-xs"></i>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Password Phrase</label>
+                <div class="relative">
+                    <input type="password" name="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                    <i class="fa-solid fa-lock absolute left-3 top-3.5 text-gray-400 text-xs"></i>
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold rounded-xl py-2.5 text-sm hover:bg-blue-700 shadow-md shadow-blue-500/20 transition mt-2 cursor-pointer">
+                Verify Authentication Profile
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

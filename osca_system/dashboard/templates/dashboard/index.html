@@ -1,0 +1,38 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">System Activity Metrics Summary</h1>
+    <p class="text-xs text-gray-400 mt-0.5">Live statistical metrics updated based on regional demographics pools</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-blue-600 text-white p-5 rounded-2xl flex justify-between items-center shadow-md shadow-blue-600/10">
+        <div>
+            <p class="text-[10px] uppercase opacity-75 font-bold tracking-wider">Total Members Enrolled</p>
+            <h3 class="text-3xl font-bold mt-1 font-mono">{{ total_seniors }}</h3>
+        </div>
+        <i class="fa-solid fa-users text-4xl opacity-25"></i>
+    </div>
+    <div class="bg-emerald-600 text-white p-5 rounded-2xl flex justify-between items-center shadow-md shadow-emerald-600/10">
+        <div>
+            <p class="text-[10px] uppercase opacity-75 font-bold tracking-wider">Active Status Accounts</p>
+            <h3 class="text-3xl font-bold mt-1 font-mono">{{ active_count }}</h3>
+        </div>
+        <i class="fa-solid fa-user-check text-4xl opacity-25"></i>
+    </div>
+    <div class="bg-rose-600 text-white p-5 rounded-2xl flex justify-between items-center shadow-md shadow-rose-600/10">
+        <div>
+            <p class="text-[10px] uppercase opacity-75 font-bold tracking-wider">Inactive Status Records</p>
+            <h3 class="text-3xl font-bold mt-1 font-mono">{{ inactive_count }}</h3>
+        </div>
+        <i class="fa-solid fa-user-xmark text-4xl opacity-25"></i>
+    </div>
+    <div class="bg-amber-500 text-white p-5 rounded-2xl flex justify-between items-center shadow-md shadow-amber-500/10">
+        <div>
+            <p class="text-[10px] uppercase opacity-75 font-bold tracking-wider">Birthdays (Current Month)</p>
+            <h3 class="text-3xl font-bold mt-1 font-mono">{{ birthday_count }}</h3>
+        </div>
+        <i class="fa-solid fa-cake-candles text-4xl opacity-25"></i>
+    </div>
+</div>
+{% endblock %}

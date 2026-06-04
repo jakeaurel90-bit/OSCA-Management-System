@@ -1,0 +1,109 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<header class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p class="text-sm text-gray-500">Overview of Senior Citizens Records</p>
+    </div>
+    <div class="text-sm font-semibold bg-white px-4 py-2 rounded-lg shadow-xs text-gray-600">
+        <i class="fa-regular fa-calendar-days mr-2 text-blue-500"></i>{{ current_date|date:"F d, Y | l" }}
+    </div>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="bg-blue-600 text-white rounded-xl p-5 shadow-xs flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Total Registered Senior Citizens</p>
+            <h3 class="text-4xl font-extrabold my-1">{{ total_seniors }}</h3>
+            <p class="text-xs opacity-70">Total Records</p>
+        </div>
+        <div class="bg-white/20 p-4 rounded-full"><i class="fa-solid fa-users text-2xl"></i></div>
+    </div>
+
+    <div class="bg-emerald-600 text-white rounded-xl p-5 shadow-xs flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Newly Registered Seniors</p>
+            <h3 class="text-4xl font-extrabold my-1">{{ new_this_month }}</h3>
+            <p class="text-xs opacity-70">This Month</p>
+        </div>
+        <div class="bg-white/20 p-4 rounded-full"><i class="fa-solid fa-user-plus text-2xl"></i></div>
+    </div>
+
+    <div class="bg-purple-600 text-white rounded-xl p-5 shadow-xs flex flex-col justify-between">
+        <div class="flex justify-between items-center text-xs font-semibold uppercase tracking-wider opacity-80 mb-2">
+            <span>Male: <b class="text-base">{{ male_count }}</b></span>
+            <span>Female: <b class="text-base">{{ female_count }}</b></span>
+        </div>
+        <div class="w-full bg-black/20 rounded-full h-2.5 my-2">
+            <div class="bg-amber-400 h-2.5 rounded-full" style="width: {{ male_pct }}%"></div>
+        </div>
+        <p class="text-xs opacity-70 mt-1 text-center">Total Male and Female Distribution</p>
+    </div>
+
+    <div class="bg-amber-500 text-white rounded-xl p-5 shadow-xs flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Active Members</p>
+            <h3 class="text-4xl font-extrabold my-1">{{ active_count }}</h3>
+            <p class="text-xs opacity-70">{{ active_pct }}% of total records</p>
+        </div>
+        <div class="bg-white/20 p-4 rounded-full"><i class="fa-solid fa-circle-check text-2xl"></i></div>
+    </div>
+
+    <div class="bg-rose-500 text-white rounded-xl p-5 shadow-xs flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Inactive Members</p>
+            <h3 class="text-4xl font-extrabold my-1">{{ inactive_count }}</h3>
+            <p class="text-xs opacity-70">{{ inactive_pct }}% of total records</p>
+        </div>
+        <div class="bg-white/20 p-4 rounded-full"><i class="fa-solid fa-circle-xmark text-2xl"></i></div>
+    </div>
+
+    <div class="bg-cyan-600 text-white rounded-xl p-5 shadow-xs flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Birthday Celebrants</p>
+            <h3 class="text-4xl font-extrabold my-1">{{ birthday_count }}</h3>
+            <p class="text-xs opacity-70">Celebrants this month</p>
+        </div>
+        <div class="bg-white/20 p-4 rounded-full"><i class="fa-solid fa-cake-candles text-2xl"></i></div>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow-xs border border-gray-100">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Senior Citizens Demographics by Barangay</h2>
+    <div class="relative w-full h-80">
+        <canvas id="barangayChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('barangayChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Number of Senior Citizens',
+                data: {{ chart_data|safe }},
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

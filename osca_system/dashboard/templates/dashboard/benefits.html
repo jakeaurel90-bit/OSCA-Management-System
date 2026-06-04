@@ -1,0 +1,51 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
+    <div class="mb-5">
+        <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2"><i class="fa-solid fa-hand-holding-heart text-blue-600"></i> Assistance Support Entitlements Matrix</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Toggle configuration points tracking national health insurance plans or pension portfolios updates.</p>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-gray-100">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 text-[10px] text-gray-400 font-bold uppercase border-b border-gray-200 tracking-wider">
+                    <th class="p-4">Enrollee Citizen Profile</th>
+                    <th class="p-4 text-center">Local Pensions</th>
+                    <th class="p-4 text-center">SSS Premium</th>
+                    <th class="p-4 text-center">PhilHealth Care</th>
+                    <th class="p-4 text-center">Medical Support Aid</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-xs font-medium text-gray-600">
+                {% for senior in seniors %}
+                <tr class="hover:bg-slate-50/50 transition">
+                    <td class="p-4 font-bold text-gray-900 text-sm">{{ senior.last_name }}, {{ senior.first_name }}</td>
+                    
+                    <td class="p-4 text-center text-lg">
+                        <a href="{% url 'dashboard:toggle_benefit' senior.pk 'pension' %}" class="transition">
+                            {% if senior.has_pension %}<i class="fa-solid fa-toggle-on text-blue-600"></i>{% else %}<i class="fa-solid fa-toggle-off text-gray-300"></i>{% endif %}
+                        </a>
+                    </td>
+                    <td class="p-4 text-center text-lg">
+                        <a href="{% url 'dashboard:toggle_benefit' senior.pk 'sss' %}" class="transition">
+                            {% if senior.has_sss %}<i class="fa-solid fa-toggle-on text-blue-600"></i>{% else %}<i class="fa-solid fa-toggle-off text-gray-300"></i>{% endif %}
+                        </a>
+                    </td>
+                    <td class="p-4 text-center text-lg">
+                        <a href="{% url 'dashboard:toggle_benefit' senior.pk 'philhealth' %}" class="transition">
+                            {% if senior.has_philhealth %}<i class="fa-solid fa-toggle-on text-blue-600"></i>{% else %}<i class="fa-solid fa-toggle-off text-gray-300"></i>{% endif %}
+                        </a>
+                    </td>
+                    <td class="p-4 text-center text-lg">
+                        <a href="{% url 'dashboard:toggle_benefit' senior.pk 'medical' %}" class="transition">
+                            {% if senior.has_medical_assistance %}<i class="fa-solid fa-toggle-on text-blue-600"></i>{% else %}<i class="fa-solid fa-toggle-off text-gray-300"></i>{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
