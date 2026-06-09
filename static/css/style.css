@@ -1,0 +1,102 @@
+/* --- Global Layout --- */
+body {
+    background-color: #f8fafc;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* --- Sidebar Styling --- */
+.sidebar {
+    background-color: #0b2e59 !important; 
+    color: white;
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 10px; /* Reduced to make room for logo */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar h5 {
+    color: white;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.sidebar .nav-link {
+    color: #cbd5e0;
+    text-decoration: none;
+    padding: 14px 20px;
+    display: block;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #1a365d;
+    color: white;
+    padding-left: 25px; /* Subtle slide effect */
+}
+
+.sidebar .nav-link.text-danger:hover {
+    background-color: #742a2a;
+}
+
+/* --- Main Content Area --- */
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* --- Card Styling --- */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.card h6 {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.card h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* --- Accent Borders --- */
+.card-accent-blue { border-left: 6px solid #3182ce; }
+.card-accent-green { border-left: 6px solid #38a169; }
+.card-accent-purple { border-left: 6px solid #805ad5; }
+.card-accent-yellow { border-left: 6px solid #d69e2e; }
+.card-accent-red { border-left: 6px solid #e53e3e; }
+.card-accent-teal { border-left: 6px solid #319795; }
+
+/* --- Navbar/Header --- */
+.navbar-custom {
+    background: white;
+    padding: 15px 30px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}

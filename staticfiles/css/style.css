@@ -1,0 +1,55 @@
+/* Sidebar and Layout */
+#sidebar { 
+    background-color: #0c2461; 
+    color: white; 
+    width: 250px; 
+    min-height: 100vh; 
+    position: fixed; 
+}
+
+.main-content { 
+    margin-left: 250px; 
+    padding: 20px; 
+    background-color: #f4f7f6; 
+    min-height: 100vh; 
+}
+
+/* Card Styling */
+.card { 
+    border-radius: 8px; 
+    border: none; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    margin-bottom: 20px;
+}
+
+.card h6 { 
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    text-transform: uppercase;
+    margin-bottom: 5px; 
+}
+
+.card h3 { 
+    font-size: 2.2rem; 
+    font-weight: 600;
+    margin: 5px 0; 
+}
+
+.card small { 
+    font-size: 0.85rem; 
+    font-weight: 500;
+}
+
+/* Matching the EXACT color palette from your screenshot */
+.bg-primary { background-color: #0d6efd !important; color: white !important; }   /* Blue */
+.bg-success { background-color: #198754 !important; color: white !important; }   /* Green */
+.bg-purple { background-color: #6f42c1 !important; color: white !important; }    /* Purple */
+.bg-warning { background-color: #ffc107 !important; color: #000 !important; }   /* Yellow */
+.bg-danger { background-color: #dc3545 !important; color: white !important; }    /* Red */
+.bg-info { background-color: #0dcaf0 !important; color: white !important; }      /* Light Blue */
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    #sidebar { width: 100%; position: relative; }
+    .main-content { margin-left: 0; }
+}

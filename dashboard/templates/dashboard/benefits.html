@@ -1,0 +1,16 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<h2>Benefits & Services</h2>
+<table class="table">
+    <thead><tr><th>Name</th><th>Pension Status</th><th>Action</th></tr></thead>
+    <tbody>
+        {% for s in seniors %}
+        <tr>
+            <td>{{ s.first_name }} {{ s.last_name }}</td>
+            <td>{% if s.has_pension %}Active{% else %}Inactive{% endif %}</td>
+            <td><a href="{% url 'dashboard:toggle_benefit' s.pk 'pension' %}" class="btn btn-sm btn-primary">Toggle</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

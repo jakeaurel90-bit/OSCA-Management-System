@@ -1,0 +1,34 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="container-fluid p-4">
+    <h2 class="fw-bold">Dashboard</h2>
+    <p class="text-muted">Overview of Senior Citizens Records - {{ today }}</p>
+    <div class="row g-3 mb-3">
+        <div class="col-md-4"><div class="card p-3 text-white" style="background:#0d6efd;"><h6>TOTAL REGISTERED</h6><h3>{{ total }}</h3></div></div>
+        <div class="col-md-4"><div class="card p-3 text-white" style="background:#198754;"><h6>NEWLY REGISTERED</h6><h3>{{ newly_registered }}</h3></div></div>
+        <div class="col-md-4"><div class="card p-3 text-white" style="background:#6f42c1;"><h6>MALE / FEMALE</h6><h3>{{ male }} / {{ female }}</h3></div></div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card p-3 text-white" style="background:#ffc107; color:#000;"><h6>ACTIVE MEMBERS</h6><h3>{{ active }}</h3></div></div>
+        <div class="col-md-4"><div class="card p-3 text-white" style="background:#dc3545;"><h6>INACTIVE MEMBERS</h6><h3>{{ inactive }}</h3></div></div>
+        <div class="col-md-4"><div class="card p-3 text-white" style="background:#0dcaf0;"><h6>BIRTHDAY CELEBRANTS</h6><h3>{{ birthdays }}</h3></div></div>
+    </div>
+    <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">SENIOR CITIZENS BY BARANGAY</h5>
+        <div style="height: 300px;"><canvas id="barangayChart"></canvas></div>
+    </div>
+</div>
+{{ barangay_data|json_script:"barangay-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const rawData = JSON.parse(document.getElementById('barangay-data').textContent);
+    new Chart(document.getElementById('barangayChart'), {
+        type: 'bar',
+        data: {
+            labels: rawData.map(i => i.barangay__name),
+            datasets: [{ label: 'Count', data: rawData.map(i => i.count), backgroundColor: '#0d6efd' }]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+    });
+</script>
+{% endblock %}

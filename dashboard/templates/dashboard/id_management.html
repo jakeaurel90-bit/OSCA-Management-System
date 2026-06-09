@@ -1,0 +1,32 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="container">
+    <h2>ID Management</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Pending</h3>
+            <table class="table table-warning">
+                <thead><tr><th>Name</th><th>ID Type</th></tr></thead>
+                <tbody>
+                    {% for s in pending_list %}
+                    <tr><td>{{ s.first_name }} {{ s.last_name }}</td><td>{{ s.id_type }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6">
+            <h3>Processed</h3>
+            <table class="table table-success">
+                <thead><tr><th>Name</th><th>ID Type</th></tr></thead>
+                <tbody>
+                    {% for s in processed_list %}
+                    <tr><td>{{ s.first_name }} {{ s.last_name }}</td><td>{{ s.id_type }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% load static %}
+
+<div class="sidebar bg-dark text-white p-3" style="min-height: 100vh;">
+    <div class="sidebar-header d-flex align-items-center mb-4 border-bottom pb-3">
+        <img src="{% static 'osca-logo.png' %}" alt="OSCA Logo" 
+             style="width: 45px; height: 45px; margin-right: 12px; object-fit: contain;">
+        <h5 class="mb-0 fw-bold">OSCA</h5>
+    </div>
+
+    <nav class="nav flex-column">
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:list_seniors' %}">Senior Management</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:id_management' %}">ID Management</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:benefits' %}">Benefits</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:birthday_celebrants' %}">Birthdays</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:reports' %}">Reports</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:activity_log' %}">Logs</a>
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:users' %}">Users</a>
+        <hr class="my-3">
+        <a class="nav-link text-white py-2" href="{% url 'dashboard:settings' %}">Settings</a>
+        <a class="nav-link text-danger py-2" href="{% url 'dashboard:logout' %}">Logout</a>
+    </nav>
+</div>
+
+<style>
+    .nav-link:hover {
+        background-color: #495057;
+        border-radius: 5px;
+    }
+</style>

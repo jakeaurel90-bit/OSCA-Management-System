@@ -1,0 +1,5 @@
+{% for person in celebrants %}
+    <p>{{ person.first_name }} {{ person.last_name }} - Birthdate: {{ person.birthdate }}</p>
+{% empty %}
+    <p>No birthdays this month.</p>
+{% endfor %}

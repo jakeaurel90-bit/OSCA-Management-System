@@ -1,0 +1,17 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<h2>Edit Member</h2>
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="first_name" value="{{ senior.first_name }}" required>
+    <input type="text" name="last_name" value="{{ senior.last_name }}" required>
+    
+    <select name="gender" required>
+        <option value="M" {% if senior.gender == 'M' %}selected{% endif %}>Male</option>
+        <option value="F" {% if senior.gender == 'F' %}selected{% endif %}>Female</option>
+    </select>
+    
+    <input type="text" name="phone_number" value="{{ senior.phone_number }}" required>
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

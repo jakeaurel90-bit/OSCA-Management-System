@@ -1,0 +1,49 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<div class="container-fluid p-4">
+    <h2 class="mb-4">System Settings</h2>
+    
+    <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">About the System</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>OSCA Management System</strong></p>
+            <p>Developed by: <strong>Francis Jake G. Aurel</strong></p>
+            <p>Developer Status: <strong>Active Development</strong></p>
+            <p class="text-muted small">This system is designed for efficient management of Senior Citizen records, including benefit tracking and ID processing.</p>
+        </div>
+    </div>
+
+    <h4 class="mb-3">Recycle Bin (Restoration Area)</h4>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in deleted_seniors %}
+                <tr>
+                    <td>{{ s.last_name }}, {{ s.first_name }}</td>
+                    <td>
+                        <form action="{% url 'dashboard:restore_senior' s.pk %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-muted">No deleted records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

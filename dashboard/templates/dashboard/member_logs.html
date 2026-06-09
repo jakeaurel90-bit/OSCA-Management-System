@@ -1,0 +1,5 @@
+<table>
+    {% for log in logs %}
+        <tr><td>{{ log.timestamp }}</td><td>{{ log.action }}</td></tr>
+    {% endfor %}
+</table>
