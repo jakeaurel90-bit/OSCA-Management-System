@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>OSCA Management System</title></head>
+<body>
+    <nav>
+        <a href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+        <a href="{% url 'dashboard:list_seniors' %}">Members</a>
+        <a href="{% url 'dashboard:logout' %}">Logout</a>
+    </nav>
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>
