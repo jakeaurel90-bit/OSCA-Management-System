@@ -68,16 +68,24 @@ def add_senior(request):
     if request.method == 'POST':
         b_name = request.POST.get('barangay', '').strip()
         b_obj, _ = Barangay.objects.get_or_create(name=b_name)
+        
         senior = SeniorCitizen.objects.create(
-            first_name=request.POST.get('first_name'), 
+            first_name=request.POST.get('first_name'),
+            middle_initial=request.POST.get('middle_initial'),
             last_name=request.POST.get('last_name'),
+            suffix=request.POST.get('suffix'),
+            address=request.POST.get('address'),
             birthdate=request.POST.get('birthdate'), 
             gender=request.POST.get('gender'),
             phone_number=request.POST.get('phone_number'), 
             barangay=b_obj, 
-            status='ACTIVE'
+            status='ACTIVE',
+            has_pension='has_pension' in request.POST,
+            has_medical_assistance='has_medical_assistance' in request.POST,
+            has_philhealth='has_philhealth' in request.POST,
+            has_sss='has_sss' in request.POST
         )
-        create_log(request.user, 'CREATE', f"Added senior: {senior.last_name}, {senior.first_name}")
+        create_log(request.user, 'CREATE', f"Registered: {senior.first_name} {senior.last_name}")
         return redirect('dashboard:list_seniors')
     return render(request, 'dashboard/registration.html')
 
@@ -85,44 +93,42 @@ def add_senior(request):
 def edit_senior(request, pk):
     senior = get_object_or_404(SeniorCitizen, pk=pk)
     if request.method == 'POST':
-        senior.first_name = request.POST.get('first_name', senior.first_name)
-        senior.last_name = request.POST.get('last_name', senior.last_name)
+        senior.first_name = request.POST.get('first_name')
+        senior.middle_initial = request.POST.get('middle_initial')
+        senior.last_name = request.POST.get('last_name')
+        senior.suffix = request.POST.get('suffix')
+        senior.address = request.POST.get('address')
         senior.save()
-        create_log(request.user, 'UPDATE', f"Updated senior: {senior.last_name}")
+        create_log(request.user, 'UPDATE', f"Edited: {senior.first_name} {senior.last_name}")
         return redirect('dashboard:list_seniors')
-    return render(request, 'dashboard/edit.html', {'senior': senior})
+    return render(request, 'dashboard/edit_senior.html', {'senior': senior})
 
 @login_required(login_url='dashboard:login')
 def delete_senior(request, pk):
-    senior = get_object_or_404(SeniorCitizen.all_objects, pk=pk)
-    if request.method == 'POST':
-        senior.is_deleted = True 
-        senior.save()
-        create_log(request.user, 'DELETE', f"Deleted senior: {senior.last_name}")
-        return redirect('dashboard:list_seniors')
-    return render(request, 'dashboard/confirm_delete.html', {'senior': senior})
+    senior = get_object_or_404(SeniorCitizen, pk=pk)
+    senior.is_deleted = True
+    senior.save()
+    create_log(request.user, 'DELETE', f"Deleted: {senior.last_name}")
+    return redirect('dashboard:list_seniors')
 
 @login_required(login_url='dashboard:login')
 def restore_senior(request, pk):
-    senior = get_object_or_404(SeniorCitizen.all_objects, pk=pk, is_deleted=True)
-    if request.method == 'POST':
-        senior.is_deleted = False
-        senior.save()
-        create_log(request.user, 'RESTORE', f"Restored senior: {senior.last_name}")
+    senior = get_object_or_404(SeniorCitizen, pk=pk)
+    senior.is_deleted = False
+    senior.save()
     return redirect('dashboard:settings')
 
-# --- ID & OTHER MANAGEMENT ---
 @login_required(login_url='dashboard:login')
 def mark_id_processed(request, pk):
     senior = get_object_or_404(SeniorCitizen, pk=pk)
-    if request.method == 'POST':
-        senior.id_status = 'PROCESSED'
-        senior.save()
-        create_log(request.user, 'ID_PROCESS', f"Processed ID for: {senior.last_name}")
+    senior.id_status = 'PROCESSED'
+    senior.save()
     return redirect('dashboard:id_management')
 
+# --- ID & OTHER MANAGEMENT ---
 @login_required(login_url='dashboard:login')
-def list_seniors(request): return render(request, 'dashboard/list_seniors.html', {'seniors': SeniorCitizen.objects.all()})
+def list_seniors(request): 
+    return render(request, 'dashboard/list_seniors.html', {'seniors': SeniorCitizen.objects.filter(is_deleted=False)})
 
 @login_required(login_url='dashboard:login')
 def id_management_view(request): 
@@ -132,22 +138,32 @@ def id_management_view(request):
     })
 
 @login_required(login_url='dashboard:login')
-def benefits_view(request): return render(request, 'dashboard/benefits.html')
+def benefits_view(request): 
+    return render(request, 'dashboard/benefits.html', {'seniors': SeniorCitizen.objects.all()})
 
 @login_required(login_url='dashboard:login')
+def toggle_benefit(request, pk, benefit_type):
+    senior = get_object_or_404(SeniorCitizen, pk=pk)
+    if benefit_type == 'pension': senior.has_pension = not senior.has_pension
+    elif benefit_type == 'medical': senior.has_medical_assistance = not senior.has_medical_assistance
+    elif benefit_type == 'philhealth': senior.has_philhealth = not senior.has_philhealth
+    elif benefit_type == 'sss': senior.has_sss = not senior.has_sss
+    senior.save()
+    create_log(request.user, 'UPDATE_BENEFIT', f"Toggled {benefit_type} for {senior.last_name}")
+    return redirect('dashboard:benefits')
+
+# --- REMAINING FUNCTIONS ---
 def birthday_celebrants_view(request): 
     return render(request, 'dashboard/birthday_celebrants.html', {'celebrants': SeniorCitizen.objects.filter(birthdate__month=timezone.now().month)})
 
-@login_required(login_url='dashboard:login')
 def reports_view(request):
     return render(request, 'dashboard/reports.html', {'barangay_stats': Barangay.objects.annotate(senior_count=Count('residents'))})
 
-@login_required(login_url='dashboard:login')
-def activity_log_view(request): return render(request, 'dashboard/member_logs.html', {'logs': MemberLog.objects.all().order_by('-timestamp')})
+def activity_log_view(request): 
+    return render(request, 'dashboard/member_logs.html', {'logs': MemberLog.objects.all().order_by('-timestamp')})
 
-@login_required(login_url='dashboard:login')
-def users_view(request): return render(request, 'dashboard/users.html', {'system_users': User.objects.all()})
+def users_view(request): 
+    return render(request, 'dashboard/users.html', {'system_users': User.objects.all()})
 
-@login_required(login_url='dashboard:login')
 def settings_view(request): 
-    return render(request, 'dashboard/settings.html', {'deleted_seniors': SeniorCitizen.all_objects.filter(is_deleted=True)})
+    return render(request, 'dashboard/settings.html', {'deleted_seniors': SeniorCitizen.objects.filter(is_deleted=True)})

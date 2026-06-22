@@ -22,7 +22,10 @@ class SeniorCitizen(models.Model):
 
     id_number = models.CharField(max_length=50, unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=100)
+    middle_initial = models.CharField(max_length=2, blank=True, null=True) # Added
     last_name = models.CharField(max_length=100)
+    suffix = models.CharField(max_length=10, blank=True, null=True)       # Added
+    address = models.CharField(max_length=255, default='Not specified')   # Added
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     birthdate = models.DateField()
     phone_number = models.CharField(max_length=13, validators=[phone_validator])

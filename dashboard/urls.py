@@ -32,6 +32,9 @@ urlpatterns = [
     
     # Other Modules
     path('benefits/', views.benefits_view, name='benefits'),
+    # Added toggle_benefit path below
+    path('benefits/toggle/<int:pk>/<str:benefit_type>/', views.toggle_benefit, name='toggle_benefit'),
+    
     path('birthdays/', views.birthday_celebrants_view, name='birthday_celebrants'),
     path('logs/', views.activity_log_view, name='activity_log'),
     path('users/', views.users_view, name='users'),
