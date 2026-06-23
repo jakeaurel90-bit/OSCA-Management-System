@@ -6,19 +6,20 @@
         {% csrf_token %}
         
         <div class="row mb-3">
-            <div class="col-md-3"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-control" required></div>
+            <div class="col-md-3"><label class="form-label">First Name <span class="text-danger"> *</span></label>
+                <input type="text" name="first_name" class="form-control" required maxlength="30"></div>
             <div class="col-md-2"><label class="form-label">M.I.</label><input type="text" name="middle_initial" class="form-control" maxlength="2"></div>
-            <div class="col-md-4"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-control" required></div>
+            <div class="col-md-4"><label class="form-label">Last Name<span class="text-danger"> *</span></label><input type="text" name="last_name" class="form-control" required></div>
             <div class="col-md-3"><label class="form-label">Suffix</label><input type="text" name="suffix" class="form-control" placeholder="e.g. Jr, Sr"></div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-8"><label class="form-label">Address</label><input type="text" name="address" class="form-control" required></div>
-            <div class="col-md-4"><label class="form-label">Barangay</label><input type="text" name="barangay" class="form-control" required></div>
+            <div class="col-md-8"><label class="form-label">Address<span class="text-danger"> *</span></label><input type="text" name="address" class="form-control" required></div>
+            <div class="col-md-4"><label class="form-label">Barangay<span class="text-danger"> *</span></label><input type="text" name="barangay" class="form-control" required></div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-4"><label class="form-label">Birthdate</label><input type="date" name="birthdate" class="form-control" required></div>
+            <div class="col-md-4"><label class="form-label">Birthdate<span class="text-danger"> *</span></label><input type="date" name="birthdate" class="form-control" required></div>
             <div class="col-md-4">
                 <label class="form-label">Sex</label>
                 <select name="gender" class="form-select">
@@ -26,7 +27,8 @@
                     <option value="F">Female</option>
                 </select>
             </div>
-            <div class="col-md-4"><label class="form-label">Phone Number</label><input type="text" name="phone_number" class="form-control" value="+63" required></div>
+            <div class="col-md-4"><label class="form-label">Phone Number<span class="text-danger"> *</span></label>
+                <input type="tel" name="phone_number" class="form-control" value="+63" required maxlength="16"></div>
         </div>
 
         <div class="mb-4">
