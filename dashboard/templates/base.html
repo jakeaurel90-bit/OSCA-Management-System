@@ -1,13 +1,28 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
-<head><title>OSCA Management System</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSCA Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar { min-height: 100vh; position: sticky; top: 0; }
+        .main-content { flex: 1; overflow-y: auto; height: 100vh; }
+    </style>
+</head>
 <body>
-    <nav>
-        <a href="{% url 'dashboard:dashboard' %}">Dashboard</a>
-        <a href="{% url 'dashboard:list_seniors' %}">Members</a>
-        <a href="{% url 'dashboard:logout' %}">Logout</a>
-    </nav>
-    <hr>
-    {% block content %}{% endblock %}
+
+    <div class="d-flex">
+        {% include 'dashboard/sidebar.html' %}
+
+        <main class="main-content bg-light p-4">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,18 +1,16 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import SeniorCitizen, Barangay, MemberLog
 
-# --- LOGGING HELPER ---
 def create_log(user, action, details):
     MemberLog.objects.create(user=user, action=action, details=details)
 
-# --- AUTHENTICATION ---
 def login_view(request):
     if request.user.is_authenticated: return redirect('dashboard:dashboard')
     if request.method == 'POST':
@@ -41,7 +39,6 @@ def logout_view(request):
     logout(request)
     return redirect('dashboard:login')
 
-# --- DASHBOARD ---
 @login_required(login_url='dashboard:login')
 def dashboard_view(request):
     now = timezone.now()
@@ -62,46 +59,57 @@ def dashboard_view(request):
     }
     return render(request, 'dashboard/index.html', context)
 
-# --- CRUD OPERATIONS WITH LOGGING ---
 @login_required(login_url='dashboard:login')
 def add_senior(request):
+    barangays = Barangay.objects.exclude(name__icontains="txtSQL").order_by('name')
     if request.method == 'POST':
-        b_name = request.POST.get('barangay', '').strip()
-        b_obj, _ = Barangay.objects.get_or_create(name=b_name)
-        
-        senior = SeniorCitizen.objects.create(
-            first_name=request.POST.get('first_name'),
-            middle_initial=request.POST.get('middle_initial'),
-            last_name=request.POST.get('last_name'),
-            suffix=request.POST.get('suffix'),
-            address=request.POST.get('address'),
-            birthdate=request.POST.get('birthdate'), 
-            gender=request.POST.get('gender'),
-            phone_number=request.POST.get('phone_number'), 
-            barangay=b_obj, 
-            status='ACTIVE',
-            has_pension='has_pension' in request.POST,
-            has_medical_assistance='has_medical_assistance' in request.POST,
-            has_philhealth='has_philhealth' in request.POST,
-            has_sss='has_sss' in request.POST
-        )
-        create_log(request.user, 'CREATE', f"Registered: {senior.first_name} {senior.last_name}")
-        return redirect('dashboard:list_seniors')
-    return render(request, 'dashboard/registration.html')
+        b_id = request.POST.get('barangay')
+        if b_id:
+            barangay_obj = get_object_or_404(Barangay, id=b_id)
+            senior = SeniorCitizen.objects.create(
+                first_name=request.POST.get('first_name'),
+                middle_initial=request.POST.get('middle_initial'),
+                last_name=request.POST.get('last_name'),
+                suffix=request.POST.get('suffix'),
+                address=request.POST.get('address'),
+                birthdate=request.POST.get('birthdate'), 
+                gender=request.POST.get('gender'),
+                phone_number=request.POST.get('phone_number'), 
+                barangay=barangay_obj, 
+                status='ACTIVE',
+                has_pension='has_pension' in request.POST,
+                has_medical_assistance='has_medical_assistance' in request.POST,
+                has_philhealth='has_philhealth' in request.POST,
+                has_sss='has_sss' in request.POST
+            )
+            create_log(request.user, 'CREATE', f"Registered: {senior.first_name} {senior.last_name}")
+            return redirect('dashboard:list_seniors')
+    return render(request, 'dashboard/registration.html', {'barangays': barangays})
 
 @login_required(login_url='dashboard:login')
 def edit_senior(request, pk):
     senior = get_object_or_404(SeniorCitizen, pk=pk)
+    barangays = Barangay.objects.all().order_by('name')
     if request.method == 'POST':
+        b_id = request.POST.get('barangay')
+        barangay_obj = get_object_or_404(Barangay, id=b_id)
         senior.first_name = request.POST.get('first_name')
         senior.middle_initial = request.POST.get('middle_initial')
         senior.last_name = request.POST.get('last_name')
         senior.suffix = request.POST.get('suffix')
         senior.address = request.POST.get('address')
+        senior.birthdate = request.POST.get('birthdate')
+        senior.gender = request.POST.get('gender')
+        senior.phone_number = request.POST.get('phone_number')
+        senior.barangay = barangay_obj
+        senior.has_pension = 'has_pension' in request.POST
+        senior.has_medical_assistance = 'has_medical_assistance' in request.POST
+        senior.has_philhealth = 'has_philhealth' in request.POST
+        senior.has_sss = 'has_sss' in request.POST
         senior.save()
         create_log(request.user, 'UPDATE', f"Edited: {senior.first_name} {senior.last_name}")
         return redirect('dashboard:list_seniors')
-    return render(request, 'dashboard/edit_senior.html', {'senior': senior})
+    return render(request, 'dashboard/edit_senior.html', {'senior': senior, 'barangays': barangays})
 
 @login_required(login_url='dashboard:login')
 def delete_senior(request, pk):
@@ -125,7 +133,6 @@ def mark_id_processed(request, pk):
     senior.save()
     return redirect('dashboard:id_management')
 
-# --- ID & OTHER MANAGEMENT ---
 @login_required(login_url='dashboard:login')
 def list_seniors(request): 
     return render(request, 'dashboard/list_seniors.html', {'seniors': SeniorCitizen.objects.filter(is_deleted=False)})
@@ -152,12 +159,14 @@ def toggle_benefit(request, pk, benefit_type):
     create_log(request.user, 'UPDATE_BENEFIT', f"Toggled {benefit_type} for {senior.last_name}")
     return redirect('dashboard:benefits')
 
-# --- REMAINING FUNCTIONS ---
 def birthday_celebrants_view(request): 
     return render(request, 'dashboard/birthday_celebrants.html', {'celebrants': SeniorCitizen.objects.filter(birthdate__month=timezone.now().month)})
 
+@login_required(login_url='dashboard:login')
 def reports_view(request):
-    return render(request, 'dashboard/reports.html', {'barangay_stats': Barangay.objects.annotate(senior_count=Count('residents'))})
+    # Filters out txtSQL at the database level for a clean report
+    barangay_stats = Barangay.objects.exclude(name__icontains="txtSQL").annotate(senior_count=Count('residents'))
+    return render(request, 'dashboard/reports.html', {'barangay_stats': barangay_stats})
 
 def activity_log_view(request): 
     return render(request, 'dashboard/member_logs.html', {'logs': MemberLog.objects.all().order_by('-timestamp')})

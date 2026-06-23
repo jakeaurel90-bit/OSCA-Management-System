@@ -9,22 +9,17 @@ class SeniorCitizenAdmin(admin.ModelAdmin):
         'gender', 
         'barangay', 
         'status', 
-        'id_type', 
-        'id_status',
-        'is_deleted'  # Added to track soft-deleted records
+        'is_deleted'
     )
     list_filter = (
         'status', 
         'gender', 
         'barangay', 
-        'id_type', 
-        'id_status',
-        'is_deleted'  # Added to filter by deletion status
+        'is_deleted'
     )
     search_fields = ('last_name', 'first_name', 'id_number')
     
-    # Keeping id_processed_date as read-only for data integrity
-    readonly_fields = ('id_processed_date',)
+    # Removed readonly_fields since id_processed_date no longer exists in the model
 
 @admin.register(Barangay)
 class BarangayAdmin(admin.ModelAdmin):

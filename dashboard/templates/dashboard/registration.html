@@ -6,20 +6,47 @@
         {% csrf_token %}
         
         <div class="row mb-3">
-            <div class="col-md-3"><label class="form-label">First Name <span class="text-danger"> *</span></label>
-                <input type="text" name="first_name" class="form-control" required maxlength="30"></div>
-            <div class="col-md-2"><label class="form-label">M.I.</label><input type="text" name="middle_initial" class="form-control" maxlength="2"></div>
-            <div class="col-md-4"><label class="form-label">Last Name<span class="text-danger"> *</span></label><input type="text" name="last_name" class="form-control" required></div>
-            <div class="col-md-3"><label class="form-label">Suffix</label><input type="text" name="suffix" class="form-control" placeholder="e.g. Jr, Sr"></div>
+            <div class="col-md-3">
+                <label class="form-label">First Name <span class="text-danger"> *</span></label>
+                <input type="text" name="first_name" class="form-control" required maxlength="30" pattern="[A-Za-z\s]+" title="Letters and spaces only.">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">M.I.</label>
+                <input type="text" name="middle_initial" class="form-control" maxlength="2" pattern="[A-Za-z]+" title="Letters only.">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Last Name<span class="text-danger"> *</span></label>
+                <input type="text" name="last_name" class="form-control" required pattern="[A-Za-z\s]+" title="Letters and spaces only.">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Suffix</label>
+                <input type="text" name="suffix" class="form-control" placeholder="e.g. Jr, Sr" pattern="[A-Za-z]+" title="Letters only.">
+            </div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-8"><label class="form-label">Address<span class="text-danger"> *</span></label><input type="text" name="address" class="form-control" required></div>
-            <div class="col-md-4"><label class="form-label">Barangay<span class="text-danger"> *</span></label><input type="text" name="barangay" class="form-control" required></div>
+            <div class="col-md-8">
+                <label class="form-label">Address<span class="text-danger"> *</span></label>
+                <input type="text" name="address" class="form-control" required pattern="[A-Za-z0-9\s\.,]+" title="Letters, numbers, spaces, dots, and commas only.">
+            </div>
+            <div class="col-md-4">
+    <label class="form-label">Barangay<span class="text-danger"> *</span></label>
+    <select name="barangay" class="form-select" required>
+        <option value="" disabled selected>Select Barangay...</option>
+        {% for b in barangays %}
+            {% if "txtSQL" not in b.name %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-4"><label class="form-label">Birthdate<span class="text-danger"> *</span></label><input type="date" name="birthdate" class="form-control" required></div>
+            <div class="col-md-4">
+                <label class="form-label">Birthdate<span class="text-danger"> *</span></label>
+                <input type="date" name="birthdate" class="form-control" required>
+            </div>
             <div class="col-md-4">
                 <label class="form-label">Sex</label>
                 <select name="gender" class="form-select">
@@ -27,8 +54,10 @@
                     <option value="F">Female</option>
                 </select>
             </div>
-            <div class="col-md-4"><label class="form-label">Phone Number<span class="text-danger"> *</span></label>
-                <input type="tel" name="phone_number" class="form-control" value="+63" required maxlength="16"></div>
+            <div class="col-md-4">
+                <label class="form-label">Phone Number<span class="text-danger"> *</span></label>
+                <input type="tel" name="phone_number" class="form-control" value="+63" required maxlength="16" pattern="^\+63[0-9]{10}$" title="Must start with +63 followed by 10 digits.">
+            </div>
         </div>
 
         <div class="mb-4">

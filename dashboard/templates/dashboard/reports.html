@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container-fluid p-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Barangay Statistics Report</h2>
+        <h2 class="fw-bold">Barangay Statistics Report</h2>
         <button onclick="window.print()" class="btn btn-primary d-print-none">
             <i class="bi bi-printer"></i> Print Report
         </button>
@@ -12,22 +12,26 @@
 
     <div class="row">
         <div class="col-md-5">
-            <div class="card p-4 shadow-sm">
-                <table class="table table-hover">
+            <div class="card p-4 shadow-sm border-0">
+                <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Barangay</th>
-                            <th>Total Seniors</th>
+                            <th>Barangay Name</th>
+                            <th class="text-center">Total Seniors</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for stat in barangay_stats %}
                         <tr>
-                            <td>{{ stat.name }}</td>
-                            <td><span class="badge bg-primary">{{ stat.senior_count }}</span></td>
+                            <td class="fw-semibold">{{ stat.name }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-primary rounded-pill">{{ stat.senior_count }}</span>
+                            </td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="2" class="text-center">No data available.</td></tr>
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No barangay data available.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -35,7 +39,7 @@
         </div>
 
         <div class="col-md-7">
-            <div class="card p-4 shadow-sm">
+            <div class="card p-4 shadow-sm border-0">
                 <canvas id="barangayChart" height="250"></canvas>
             </div>
         </div>
@@ -50,27 +54,20 @@
         data: {
             labels: [{% for stat in barangay_stats %}'{{ stat.name }}',{% endfor %}],
             datasets: [{
-                label: 'Senior Citizens per Barangay',
+                label: 'Registered Senior Citizens',
                 data: [{% for stat in barangay_stats %}{{ stat.senior_count }},{% endfor %}],
-                backgroundColor: '#3182ce',
-                borderRadius: 5
+                backgroundColor: '#3b82f6',
+                borderColor: '#2563eb',
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
     });
 </script>
-
-<style>
-    /* Ensure the print button is hidden when printing */
-    @media print {
-        .d-print-none { display: none !important; }
-        .sidebar, .navbar { display: none !important; }
-        .main-content { margin-left: 0 !important; }
-        .card { box-shadow: none !important; border: 1px solid #ddd; }
-    }
-</style>
 {% endblock %}
