@@ -1,30 +1,37 @@
 {% load static %}
 
-<div class="sidebar bg-dark text-white p-3" style="min-height: 100vh;">
-    <div class="sidebar-header d-flex align-items-center mb-4 border-bottom pb-3">
+<div class="sidebar bg-dark text-white p-3" style="min-height: 100vh; width: 260px; overflow-y: auto;">
+    <div class="sidebar-header d-flex align-items-center mb-4 border-bottom border-secondary pb-3">
         <img src="{% static 'osca-logo.png' %}" alt="OSCA Logo" 
-             style="width: 45px; height: 45px; margin-right: 12px; object-fit: contain;">
-        <h5 class="mb-0 fw-bold">OSCA</h5>
+             style="width: 40px; height: 40px; margin-right: 12px; object-fit: contain;">
+        <h5 class="mb-0 fw-bold">OSCA System</h5>
+    </div>
+
+    <div class="mb-4 p-2 bg-secondary rounded text-center">
+        <small class="d-block text-light opacity-75">Logged in as</small>
+        <strong class="text-white">{{ user.username|title }}</strong>
     </div>
 
     <nav class="nav flex-column">
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:list_seniors' %}">Senior Management</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:id_management' %}">ID Management</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:benefits' %}">Benefits</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:birthday_celebrants' %}">Birthdays</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:reports' %}">Reports</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:activity_log' %}">Logs</a>
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:users' %}">Users</a>
-        <hr class="my-3">
-        <a class="nav-link text-white py-2" href="{% url 'dashboard:settings' %}">Settings</a>
-        <a class="nav-link text-danger py-2" href="{% url 'dashboard:logout' %}">Logout</a>
+        {% with active_url=request.resolver_match.url_name %}
+        
+        <a class="nav-link text-white py-2 {% if active_url == 'dashboard' %}bg-primary active{% endif %}" href="{% url 'dashboard:dashboard' %}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+        <a class="nav-link text-white py-2 {% if active_url == 'list_seniors' %}bg-primary active{% endif %}" href="{% url 'dashboard:list_seniors' %}"><i class="bi bi-people me-2"></i> Senior Management</a>
+        <a class="nav-link text-white py-2 {% if active_url == 'id_management' %}bg-primary active{% endif %}" href="{% url 'dashboard:id_management' %}"><i class="bi bi-card-id me-2"></i> ID Management</a>
+        <a class="nav-link text-white py-2 {% if active_url == 'benefits' %}bg-primary active{% endif %}" href="{% url 'dashboard:benefits' %}"><i class="bi bi-gift me-2"></i> Benefits</a>
+        
+        <a class="nav-link text-white py-2 {% if active_url == 'birthday_celebrants' %}bg-primary active{% endif %}" href="{% url 'dashboard:birthday_celebrants' %}"><i class="bi bi-cake2 me-2"></i> Birthdays</a>
+        
+        <a class="nav-link text-white py-2 {% if active_url == 'reports' %}bg-primary active{% endif %}" href="{% url 'dashboard:reports' %}"><i class="bi bi-file-earmark-bar-graph me-2"></i> Reports</a>
+        
+        <a class="nav-link text-white py-2 {% if active_url == 'activity_log' %}bg-primary active{% endif %}" href="{% url 'dashboard:activity_log' %}"><i class="bi bi-journal-text me-2"></i> Activity Logs</a>
+        
+        <a class="nav-link text-white py-2 {% if active_url == 'users' %}bg-primary active{% endif %}" href="{% url 'dashboard:users' %}"><i class="bi bi-person-gear me-2"></i> Manage Users</a>
+        
+        <hr class="my-3 border-secondary">
+        
+        <a class="nav-link text-white py-2 {% if active_url == 'settings' %}bg-primary active{% endif %}" href="{% url 'dashboard:settings' %}"><i class="bi bi-gear me-2"></i> Settings</a>
+        <a class="nav-link text-danger py-2" href="{% url 'dashboard:logout' %}"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
+        {% endwith %}
     </nav>
 </div>
-
-<style>
-    .nav-link:hover {
-        background-color: #495057;
-        border-radius: 5px;
-    }
-</style>

@@ -27,25 +27,30 @@ class SeniorCitizenManager(models.Manager):
 
 class SeniorCitizen(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
-    STATUS_CHOICES = [('ACTIVE', 'Active'), ('INACTIVE', 'Inactive')]
+    STATUS_CHOICES = [('ACTIVE', 'Active'), ('INACTIVE', 'Inactive'), ('DECEASED', 'Deceased')]
     ID_STATUS_CHOICES = [('PENDING', 'Pending'), ('PROCESSED', 'Processed')]
+    CIVIL_STATUS_CHOICES = [
+        ('Single', 'Single'), ('Married', 'Married'), 
+        ('Widowed', 'Widowed'), ('Separated', 'Separated')
+    ]
     
     phone_validator = RegexValidator(regex=r'^\+63[0-9]{10}$', message="Format: +639XXXXXXXXX")
 
-    # Enforcing 20-character limits as requested
     first_name = models.CharField(max_length=20)
     middle_initial = models.CharField(max_length=2, blank=True, null=True)
     last_name = models.CharField(max_length=20)
     suffix = models.CharField(max_length=10, blank=True, null=True)
-    address = models.CharField(max_length=50, default='Not specified') # Limit to 50
+    address = models.CharField(max_length=50, default='Not specified')
     
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    civil_status = models.CharField(max_length=10, choices=CIVIL_STATUS_CHOICES, default='Single')
     birthdate = models.DateField()
+    age = models.IntegerField(null=True, blank=True)
     phone_number = models.CharField(max_length=13, validators=[phone_validator])
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='residents')
     
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ACTIVE')
-    date_registered = models.DateTimeField(default=timezone.now)
+    date_registered = models.DateField(default=timezone.now)
     is_deleted = models.BooleanField(default=False)
     
     id_status = models.CharField(max_length=20, choices=ID_STATUS_CHOICES, default='PENDING')

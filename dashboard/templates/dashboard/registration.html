@@ -25,38 +25,53 @@
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <label class="form-label">Address<span class="text-danger"> *</span></label>
-                <input type="text" name="address" class="form-control" required pattern="[A-Za-z0-9\s\.,]+" title="Letters, numbers, spaces, dots, and commas only.">
+                <input type="text" name="address" class="form-control" required>
             </div>
-            <div class="col-md-4">
-    <label class="form-label">Barangay<span class="text-danger"> *</span></label>
-    <select name="barangay" class="form-select" required>
-        <option value="" disabled selected>Select Barangay...</option>
-        {% for b in barangays %}
-            {% if "txtSQL" not in b.name %}
-                <option value="{{ b.id }}">{{ b.name }}</option>
-            {% endif %}
-        {% endfor %}
-    </select>
-</div>
+            <div class="col-md-3">
+                <label class="form-label">Civil Status<span class="text-danger"> *</span></label>
+                <select name="civil_status" class="form-select" required>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Widowed">Widowed</option>
+                    <option value="Separated">Separated</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Barangay<span class="text-danger"> *</span></label>
+                <select name="barangay" class="form-select" required>
+                    <option value="" disabled selected>Select Barangay...</option>
+                    {% for b in barangays %}
+                        <option value="{{ b.id }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">Birthdate<span class="text-danger"> *</span></label>
                 <input type="date" name="birthdate" class="form-control" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
+                <label class="form-label">Age <span class="text-danger">*</span></label>
+                <input type="number" name="age" class="form-control" min="60" max="150" required>
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Sex</label>
                 <select name="gender" class="form-select">
                     <option value="M">Male</option>
                     <option value="F">Female</option>
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
+                <label class="form-label">Date Registered<span class="text-danger"> *</span></label>
+                <input type="date" name="date_registered" class="form-control" value="{{ now|date:'Y-m-d' }}" required>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">Phone Number<span class="text-danger"> *</span></label>
-                <input type="tel" name="phone_number" class="form-control" value="+63" required maxlength="16" pattern="^\+63[0-9]{10}$" title="Must start with +63 followed by 10 digits.">
+                <input type="tel" name="phone_number" class="form-control" value="+63" required maxlength="16" pattern="^\+63[0-9]{10}$">
             </div>
         </div>
 

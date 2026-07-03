@@ -1,48 +1,35 @@
-{% extends 'dashboard/base.html' %}
-{% block content %}
-<div class="container-fluid p-4">
-    <h2 class="mb-4 fw-bold">Edit Senior Citizen: {{ senior.first_name }} {{ senior.last_name }}</h2>
-    <form method="POST" class="bg-white p-4 shadow-sm rounded border">
-        {% csrf_token %}
-        
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <label class="form-label">First Name <span class="text-danger"> *</span></label>
-                <input type="text" name="first_name" class="form-control" value="{{ senior.first_name }}" required maxlength="30">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">M.I.</label>
-                <input type="text" name="middle_initial" class="form-control" value="{{ senior.middle_initial|default:'' }}" maxlength="2">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Last Name<span class="text-danger"> *</span></label>
-                <input type="text" name="last_name" class="form-control" value="{{ senior.last_name }}" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Suffix</label>
-                <input type="text" name="suffix" class="form-control" value="{{ senior.suffix|default:'' }}">
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-8">
-                <label class="form-label">Address<span class="text-danger"> *</span></label>
-                <input type="text" name="address" class="form-control" value="{{ senior.address }}" required>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Barangay<span class="text-danger"> *</span></label>
-                <select name="barangay" class="form-select" required>
-                    {% for b in barangays %}
-                        <option value="{{ b.id }}" {% if b.id == senior.barangay.id %}selected{% endif %}>
-                            {{ b.name }}
-                        </option>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0 mt-5">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Login</h2>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     {% endfor %}
-                </select>
+                {% endif %}
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+                </form>
+
+                <div class="text-center">
+                    <p class="mb-0"><a href="{% url 'password_reset' %}" class="text-decoration-none">Forgot your password?</a></p>
+                </div>
             </div>
         </div>
-
-        <button type="submit" class="btn btn-primary px-5">Save Changes</button>
-        <a href="{% url 'dashboard:list_seniors' %}" class="btn btn-secondary px-5">Cancel</a>
-    </form>
+    </div>
 </div>
-{% endblock %}
