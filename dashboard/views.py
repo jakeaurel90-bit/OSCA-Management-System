@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Q
 from django.utils import timezone
@@ -6,12 +6,15 @@ from datetime import date
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import SeniorCitizen, Barangay, MemberLog
 
 # --- Helper ---
 def create_log(user, action, details):
     MemberLog.objects.create(user=user, action=action, details=details)
+
+def is_staff(user):
+    return user.is_staff
 
 # --- Auth ---
 def login_view(request):
@@ -42,6 +45,67 @@ def logout_view(request):
         create_log(request.user, 'LOGOUT', f"User {request.user.username} logged out.")
         logout(request)
     return redirect('dashboard:login')
+
+# --- Admin/User Management ---
+@login_required(login_url='dashboard:login')
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('dashboard:dashboard')
+    else:
+        form = UserChangeForm(instance=request.user)
+    return render(request, 'dashboard/edit_profile.html', {'form': form})
+
+@login_required(login_url='dashboard:login')
+@user_passes_test(is_staff, login_url='dashboard:dashboard')
+def users_view(request): 
+    return render(request, 'dashboard/users.html', {'system_users': User.objects.all()})
+
+@login_required(login_url='dashboard:login')
+@user_passes_test(is_staff, login_url='dashboard:dashboard')
+def add_user(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        is_admin = request.POST.get('is_admin') == 'on'
+        if form.is_valid():
+            user = form.save(commit=False)
+            if is_admin:
+                user.is_staff = True
+                user.is_superuser = True
+            user.save()
+            messages.success(request, 'New user account created successfully!')
+            return redirect('dashboard:users')
+    else:
+        form = UserCreationForm()
+    return render(request, 'dashboard/add_user.html', {'form': form})
+
+@login_required(login_url='dashboard:login')
+@user_passes_test(is_staff, login_url='dashboard:dashboard')
+def edit_user(request, pk):
+    user_to_edit = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = UserChangeForm(request.POST, instance=user_to_edit)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"User {user_to_edit.username} updated successfully.")
+            return redirect('dashboard:users')
+    else:
+        form = UserChangeForm(instance=user_to_edit)
+    return render(request, 'dashboard/edit_user.html', {'form': form, 'user_to_edit': user_to_edit})
+
+@login_required(login_url='dashboard:login')
+@user_passes_test(is_staff, login_url='dashboard:dashboard')
+def delete_user(request, pk):
+    user_to_delete = get_object_or_404(User, pk=pk)
+    if user_to_delete == request.user:
+        messages.error(request, "You cannot delete your own account.")
+    else:
+        user_to_delete.delete()
+        messages.success(request, f"User {user_to_delete.username} deleted successfully.")
+    return redirect('dashboard:users')
 
 # --- Dashboard & Management ---
 @login_required(login_url='dashboard:login')
@@ -179,10 +243,6 @@ def birthday_celebrants_view(request):
 @login_required(login_url='dashboard:login')
 def activity_log_view(request): 
     return render(request, 'dashboard/member_logs.html', {'logs': MemberLog.objects.all().order_by('-timestamp')})
-
-@login_required(login_url='dashboard:login')
-def users_view(request): 
-    return render(request, 'dashboard/users.html', {'system_users': User.objects.all()})
 
 @login_required(login_url='dashboard:login')
 def settings_view(request): 

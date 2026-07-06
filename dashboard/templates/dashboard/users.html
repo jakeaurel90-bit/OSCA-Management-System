@@ -3,8 +3,10 @@
 {% block content %}
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">System Users</h2>
-        <a href="#" class="btn btn-primary"><i class="bi bi-person-plus"></i> Add New User</a>
+        <h2 class="fw-bold">System Users & Admins</h2>
+        <a href="{% url 'dashboard:add_user' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Add New User
+        </a>
     </div>
 
     <div class="card shadow-sm border-0">
@@ -14,6 +16,7 @@
                     <tr>
                         <th class="ps-4">Username</th>
                         <th>Email</th>
+                        <th>Role</th> 
                         <th>Last Login</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
@@ -23,15 +26,32 @@
                     <tr>
                         <td class="ps-4 fw-semibold">{{ u.username }}</td>
                         <td>{{ u.email|default:"N/A" }}</td>
+                        <td>
+                            {% if u.is_superuser %}
+                                <span class="badge bg-danger">Super Admin</span>
+                            {% elif u.is_staff %}
+                                <span class="badge bg-warning text-dark">Staff/Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Standard User</span>
+                            {% endif %}
+                        </td>
                         <td>{{ u.last_login|date:"M d, Y - H:i"|default:"Never" }}</td>
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <!-- Edit Button -->
+                            <a href="{% url 'dashboard:edit_user' u.pk %}" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <!-- Delete Button -->
+                            <a href="{% url 'dashboard:delete_user' u.pk %}" 
+                               class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('Are you sure you want to delete this user?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">No system users found.</td>
+                        <td colspan="5" class="text-center py-4 text-muted">No system users found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

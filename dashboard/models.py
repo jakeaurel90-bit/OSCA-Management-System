@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 
 class Barangay(models.Model):
-    # Kidapawan City Barangays
     BARANGAY_CHOICES = [
         ('Amas', 'Amas'), ('Amazion', 'Amazion'), ('Balabag', 'Balabag'), ('Balindog', 'Balindog'),
         ('Binoligan', 'Binoligan'), ('Birada', 'Birada'), ('Gayola', 'Gayola'), ('Ginatilan', 'Ginatilan'),
@@ -49,11 +48,11 @@ class SeniorCitizen(models.Model):
     phone_number = models.CharField(max_length=13, validators=[phone_validator])
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='residents')
     
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ACTIVE')
-    date_registered = models.DateField(default=timezone.now)
+    # Updated to allow null values
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ACTIVE', blank=True, null=True)
+    date_registered = models.DateField(default=timezone.now, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
-    
-    id_status = models.CharField(max_length=20, choices=ID_STATUS_CHOICES, default='PENDING')
+    id_status = models.CharField(max_length=20, choices=ID_STATUS_CHOICES, default='PENDING', blank=True, null=True)
     
     has_pension = models.BooleanField(default=False)
     has_sss = models.BooleanField(default=False)

@@ -1,35 +1,81 @@
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm border-0 mt-5">
-            <div class="card-body p-4">
-                <h2 class="text-center mb-4">Login</h2>
-                
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-                
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
-                </form>
+{% extends 'dashboard/base.html' %}
 
-                <div class="text-center">
-                    <p class="mb-0"><a href="{% url 'password_reset' %}" class="text-decoration-none">Forgot your password?</a></p>
-                </div>
+{% block title %}Edit Senior Citizen{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4 fw-bold">Edit Senior Citizen: {{ senior.first_name }} {{ senior.last_name }}</h2>
+    
+    <form method="POST" class="bg-white p-4 shadow-sm rounded border">
+        {% csrf_token %}
+        
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">First Name <span class="text-danger">*</span></label>
+                <input type="text" name="first_name" class="form-control" value="{{ senior.first_name }}" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">M.I.</label>
+                <input type="text" name="middle_initial" class="form-control" value="{{ senior.middle_initial|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                <input type="text" name="last_name" class="form-control" value="{{ senior.last_name }}" required>
             </div>
         </div>
-    </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Address <span class="text-danger">*</span></label>
+                <input type="text" name="address" class="form-control" value="{{ senior.address }}" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Civil Status <span class="text-danger">*</span></label>
+                <select name="civil_status" class="form-select" required>
+                    <option value="Single" {% if senior.civil_status == 'Single' %}selected{% endif %}>Single</option>
+                    <option value="Married" {% if senior.civil_status == 'Married' %}selected{% endif %}>Married</option>
+                    <option value="Widowed" {% if senior.civil_status == 'Widowed' %}selected{% endif %}>Widowed</option>
+                    <option value="Separated" {% if senior.civil_status == 'Separated' %}selected{% endif %}>Separated</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Barangay <span class="text-danger">*</span></label>
+                <select name="barangay" class="form-select" required>
+                    {% for b in barangays %}
+                        <option value="{{ b.id }}" {% if senior.barangay.id == b.id %}selected{% endif %}>
+                            {{ b.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label class="form-label">Birthdate <span class="text-danger">*</span></label>
+                <input type="date" name="birthdate" class="form-control" value="{{ senior.birthdate|date:'Y-m-d' }}" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Age <span class="text-danger">*</span></label>
+                <input type="number" name="age" class="form-control" value="{{ senior.age }}" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sex <span class="text-danger">*</span></label>
+                <select name="gender" class="form-select" required>
+                    <option value="M" {% if senior.gender == 'M' %}selected{% endif %}>Male</option>
+                    <option value="F" {% if senior.gender == 'F' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                <input type="tel" name="phone_number" class="form-control" value="{{ senior.phone_number }}" required>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary px-5">Save Changes</button>
+            <a href="{% url 'dashboard:list_seniors' %}" class="btn btn-secondary px-4">Cancel</a>
+        </div>
+    </form>
 </div>
+{% endblock %}

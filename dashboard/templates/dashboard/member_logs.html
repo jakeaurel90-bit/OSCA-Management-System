@@ -1,5 +1,27 @@
-<table>
+<style>
+    .log-sidebar {
+        font-size: 0.85rem;
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .log-sidebar td {
+        padding: 5px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
+    }
+    .log-timestamp {
+        color: #888;
+        display: block; /* Puts the time on its own line for better readability */
+    }
+</style>
+
+<table class="log-sidebar">
     {% for log in logs %}
-        <tr><td>{{ log.timestamp }}</td><td>{{ log.action }}</td></tr>
+        <tr>
+            <td>
+                <span class="log-timestamp">{{ log.timestamp|date:"M d, H:i" }}</span>
+                {{ log.action }}
+            </td>
+        </tr>
     {% endfor %}
 </table>
