@@ -25,11 +25,11 @@
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label class="form-label">Address <span class="text-danger">*</span></label>
                 <input type="text" name="address" class="form-control" value="{{ senior.address }}" required>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Civil Status <span class="text-danger">*</span></label>
                 <select name="civil_status" class="form-select" required>
                     <option value="Single" {% if senior.civil_status == 'Single' %}selected{% endif %}>Single</option>
@@ -38,7 +38,7 @@
                     <option value="Separated" {% if senior.civil_status == 'Separated' %}selected{% endif %}>Separated</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Barangay <span class="text-danger">*</span></label>
                 <select name="barangay" class="form-select" required>
                     {% for b in barangays %}
@@ -46,6 +46,21 @@
                             {{ b.name }}
                         </option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Status <span class="text-danger">*</span></label>
+                <select name="status" class="form-select" required>
+                    <option value="ACTIVE" {% if senior.status == 'ACTIVE' %}selected{% endif %}>Active</option>
+                    <option value="INACTIVE" {% if senior.status == 'INACTIVE' %}selected{% endif %}>Inactive</option>
+                    <option value="DECEASED" {% if senior.status == 'DECEASED' %}selected{% endif %}>Deceased</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">ID Status <span class="text-danger">*</span></label>
+                <select name="id_status" class="form-select" required>
+                    <option value="PENDING" {% if senior.id_status == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="PROCESSED" {% if senior.id_status == 'PROCESSED' %}selected{% endif %}>Processed</option>
                 </select>
             </div>
         </div>
@@ -64,6 +79,15 @@
                 <select name="gender" class="form-select" required>
                     <option value="M" {% if senior.gender == 'M' %}selected{% endif %}>Male</option>
                     <option value="F" {% if senior.gender == 'F' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">ID Type <span class="text-danger">*</span></label>
+                <select name="id_type" class="form-select" required>
+                    <option value="SSS" {% if senior.id_type == 'SSS' %}selected{% endif %}>SSS</option>
+                    <option value="PHILHEALTH" {% if senior.id_type == 'PHILHEALTH' %}selected{% endif %}>PhilHealth</option>
+                    <option value="PENSION" {% if senior.id_type == 'PENSION' %}selected{% endif %}>Pension</option>
+                    <option value="MEDICAL" {% if senior.id_type == 'MEDICAL' %}selected{% endif %}>Medical</option>
                 </select>
             </div>
             <div class="col-md-3">

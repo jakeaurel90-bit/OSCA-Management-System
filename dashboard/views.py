@@ -153,7 +153,9 @@ def add_senior(request):
                 date_registered=request.POST.get('date_registered'),
                 phone_number=request.POST.get('phone_number'), 
                 barangay=barangay_obj, 
-                status='ACTIVE',
+                status=request.POST.get('status', 'ACTIVE'),
+                id_status=request.POST.get('id_status', 'PENDING'),
+                id_type=request.POST.get('id_type', 'PENSION'),
                 has_pension='has_pension' in request.POST,
                 has_medical_assistance='has_medical_assistance' in request.POST,
                 has_philhealth='has_philhealth' in request.POST,
@@ -183,6 +185,8 @@ def edit_senior(request, pk):
         senior.phone_number = request.POST.get('phone_number')
         senior.barangay = barangay_obj
         senior.status = request.POST.get('status')
+        senior.id_status = request.POST.get('id_status')
+        senior.id_type = request.POST.get('id_type')
         senior.has_pension = 'has_pension' in request.POST
         senior.has_medical_assistance = 'has_medical_assistance' in request.POST
         senior.has_philhealth = 'has_philhealth' in request.POST
@@ -251,14 +255,21 @@ def settings_view(request):
 @login_required(login_url='dashboard:login')
 def reports_view(request):
     all_seniors = SeniorCitizen.objects.filter(is_deleted=False)
+    
+    # Corrected beneficiaries calculation
+    active_beneficiaries_count = all_seniors.filter(status='ACTIVE').filter(
+        Q(has_pension=True) | 
+        Q(has_medical_assistance=True) | 
+        Q(has_philhealth=True) | 
+        Q(has_sss=True)
+    ).count()
+
     context = {
         'total_seniors': all_seniors.count(),
         'active_seniors': all_seniors.filter(status='ACTIVE').count(),
         'inactive_seniors': all_seniors.filter(status='INACTIVE').count(),
         'deceased_seniors': all_seniors.filter(status='DECEASED').count(),
-        'active_beneficiaries': all_seniors.filter(
-            status='ACTIVE'
-        ).filter(Q(has_pension=True) | Q(has_medical_assistance=True) | Q(has_philhealth=True) | Q(has_sss=True)).count(),
+        'active_beneficiaries': active_beneficiaries_count,
         'barangay_stats': Barangay.objects.exclude(name__icontains="txtSQL").annotate(
             senior_count=Count('residents', filter=Q(residents__is_deleted=False))
         ),

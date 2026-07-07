@@ -28,6 +28,15 @@ class SeniorCitizen(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
     STATUS_CHOICES = [('ACTIVE', 'Active'), ('INACTIVE', 'Inactive'), ('DECEASED', 'Deceased')]
     ID_STATUS_CHOICES = [('PENDING', 'Pending'), ('PROCESSED', 'Processed')]
+    
+    # Updated: Changed 'SENIOR' choice to 'PENSION'
+    ID_TYPE_CHOICES = [
+        ('SSS', 'SSS'),
+        ('PHILHEALTH', 'PhilHealth'),
+        ('PENSION', 'Pension'), 
+        ('MEDICAL', 'Medical'),
+    ]
+    
     CIVIL_STATUS_CHOICES = [
         ('Single', 'Single'), ('Married', 'Married'), 
         ('Widowed', 'Widowed'), ('Separated', 'Separated')
@@ -48,11 +57,11 @@ class SeniorCitizen(models.Model):
     phone_number = models.CharField(max_length=13, validators=[phone_validator])
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='residents')
     
-    # Updated to allow null values
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ACTIVE', blank=True, null=True)
     date_registered = models.DateField(default=timezone.now, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     id_status = models.CharField(max_length=20, choices=ID_STATUS_CHOICES, default='PENDING', blank=True, null=True)
+    id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES, default='PENSION')
     
     has_pension = models.BooleanField(default=False)
     has_sss = models.BooleanField(default=False)

@@ -25,11 +25,11 @@
         </div>
 
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">Address<span class="text-danger"> *</span></label>
                 <input type="text" name="address" class="form-control" required>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Civil Status<span class="text-danger"> *</span></label>
                 <select name="civil_status" class="form-select" required>
                     <option value="Single">Single</option>
@@ -45,6 +45,15 @@
                     {% for b in barangays %}
                         <option value="{{ b.id }}">{{ b.name }}</option>
                     {% endfor %}
+                </select>
+            </div>
+            <!-- Added Status Selection -->
+            <div class="col-md-3">
+                <label class="form-label">Status<span class="text-danger"> *</span></label>
+                <select name="status" class="form-select" required>
+                    <option value="ACTIVE" selected>Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="DECEASED">Deceased</option>
                 </select>
             </div>
         </div>

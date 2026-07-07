@@ -2,62 +2,114 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* Print-specific styles */
+    @media print {
+        /* Hide UI elements */
+        .no-print, .btn, .d-print-none {
+            display: none !important;
+        }
+
+        /* Ensure only the report is visible */
+        body * {
+            visibility: hidden;
+        }
+        #printable-report, #printable-report * {
+            visibility: visible;
+        }
+        #printable-report {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        /* Show the print header */
+        .print-only {
+            display: block !important;
+        }
+    }
+    
+    .print-only {
+        display: none;
+    }
+</style>
+
 <div class="container-fluid p-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">OSCA System Reports</h2>
+        <h2 class="fw-bold no-print">OSCA System Reports</h2>
         <button onclick="window.print()" class="btn btn-primary d-print-none">
             <i class="bi bi-printer"></i> Print Report
         </button>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-2"><div class="card p-3 bg-primary text-white text-center"><h6>Total</h6><h3>{{ total_seniors }}</h3></div></div>
-        <div class="col-md-2"><div class="card p-3 bg-success text-white text-center"><h6>Active</h6><h3>{{ active_seniors }}</h3></div></div>
-        <div class="col-md-2"><div class="card p-3 bg-warning text-dark text-center"><h6>Inactive</h6><h3>{{ inactive_seniors }}</h3></div></div>
-        <div class="col-md-2"><div class="card p-3 bg-danger text-white text-center"><h6>Deceased</h6><h3>{{ deceased_seniors }}</h3></div></div>
-        <div class="col-md-4"><div class="card p-3 bg-info text-white text-center"><h6>Active Beneficiaries (Pension/SSS/PhilHealth)</h6><h3>{{ active_beneficiaries }}</h3></div></div>
-    </div>
+    <div id="printable-report">
+        <div class="print-only text-center mb-4">
+            <h4>Office of the Senior Citizen Affairs</h4>
+            <p>Summary Statistical Report - {{ today }}</p>
+        </div>
 
-    <div class="row">
-        <div class="col-md-5">
-            <div class="card p-4 shadow-sm border-0">
-                <h5 class="mb-3">Per Barangay</h5>
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr><th>Barangay</th><th class="text-center">Count</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for stat in barangay_stats %}
-                        <tr>
-                            <td class="fw-semibold">{{ stat.name }}</td>
-                            <td class="text-center"><span class="badge bg-primary rounded-pill">{{ stat.senior_count }}</span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="row mb-4">
+            <div class="col-md-2"><div class="card p-3 bg-primary text-white text-center"><h6>Total</h6><h3>{{ total_seniors }}</h3></div></div>
+            <div class="col-md-2"><div class="card p-3 bg-success text-white text-center"><h6>Active</h6><h3>{{ active_seniors }}</h3></div></div>
+            <div class="col-md-2"><div class="card p-3 bg-warning text-dark text-center"><h6>Inactive</h6><h3>{{ inactive_seniors }}</h3></div></div>
+            <div class="col-md-2"><div class="card p-3 bg-danger text-white text-center"><h6>Deceased</h6><h3>{{ deceased_seniors }}</h3></div></div>
+            <div class="col-md-4"><div class="card p-3 bg-info text-white text-center"><h6>Active Beneficiaries</h6><h3>{{ active_beneficiaries }}</h3></div></div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card p-4 shadow-sm border-0">
+                    <h5 class="mb-3">Per Barangay</h5>
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr><th>Barangay</th><th class="text-center">Count</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in barangay_stats %}
+                            <tr>
+                                <td class="fw-semibold">{{ stat.name }}</td>
+                                <td class="text-center"><span class="badge bg-primary rounded-pill">{{ stat.senior_count }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card p-4 shadow-sm border-0">
+                    <h5 class="mb-3">Barangay Visual</h5>
+                    <canvas id="barangayChart" height="250"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-7">
-            <div class="card p-4 shadow-sm border-0">
-                <h5 class="mb-3">Barangay Visual</h5>
-                <canvas id="barangayChart" height="250"></canvas>
-            </div>
+        <div class="card mt-4 shadow-sm border-0 p-4">
+            <h5>Birthday Celebrants (This Month)</h5>
+            <ul class="list-unstyled">
+                {% for b in birthday_celebrants %}
+                <li><strong>{{ b.first_name }} {{ b.last_name }}</strong> - {{ b.birthdate|date:"M d" }} ({{ b.barangay.name }})</li>
+                {% endfor %}
+            </ul>
         </div>
-    </div>
-
-    <div class="card mt-4 shadow-sm border-0 p-4">
-        <h5>Birthday Celebrants (This Month)</h5>
-        <ul>
-            {% for b in birthday_celebrants %}
-            <li>{{ b.first_name }} {{ b.last_name }} ({{ b.birthdate|date:"M d" }}) - {{ b.barangay.name }}</li>
-            {% endfor %}
-        </ul>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // ... your existing Chart.js code ...
+    // Ensure chart exists before rendering
+    const ctx = document.getElementById('barangayChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for stat in barangay_stats %}'{{ stat.name }}',{% endfor %}],
+            datasets: [{
+                label: 'Senior Count',
+                data: [{% for stat in barangay_stats %}{{ stat.senior_count }},{% endfor %}],
+                backgroundColor: 'rgba(13, 110, 253, 0.5)'
+            }]
+        }
+    });
 </script>
 {% endblock %}

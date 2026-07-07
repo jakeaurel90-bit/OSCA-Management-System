@@ -11,10 +11,11 @@
             <thead class="table-dark">
                 <tr>
                     <th>Name</th>
-                    <th>Age</th> <!-- Added Age column -->
+                    <th>Age</th>
                     <th>Barangay</th>
                     <th>Status</th>
                     <th>ID Status</th>
+                    <th>ID Type</th> <!-- New Column -->
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -22,28 +23,39 @@
                 {% for s in seniors %}
                 <tr>
                     <td>{{ s.last_name }}, {{ s.first_name }}</td>
-                    <td>{{ s.age }}</td> <!-- Displaying Age -->
+                    <td>{{ s.age }}</td>
                     <td>{{ s.barangay.name }}</td>
                     <td>
-                        <span class="badge {% if s.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %}">
+                        <span class="badge {% if s.status == 'ACTIVE' %}bg-success{% elif s.status == 'DECEASED' %}bg-danger{% else %}bg-secondary{% endif %}">
                             {{ s.status }}
                         </span>
                     </td>
-                    <td>{{ s.id_status }}</td>
                     <td>
-                        <div class="btn-group" role="group">
-                            <a href="{% url 'dashboard:edit_senior' s.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <span class="badge {% if s.id_status == 'PROCESSED' %}bg-info{% else %}bg-warning text-dark{% endif %}">
+                            {{ s.id_status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-primary fw-bold">{{ s.id_type }}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex" role="group">
+                            <a href="{% url 'dashboard:edit_senior' s.pk %}" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
                             
                             <form action="{% url 'dashboard:delete_senior' s.pk %}" method="POST" onsubmit="return confirm('Delete this record permanently?');">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-danger ms-2">Delete</button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
                             </form>
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">No seniors registered yet.</td>
+                    <td colspan="7" class="text-center">No seniors registered yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>
