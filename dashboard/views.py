@@ -72,9 +72,14 @@ def add_user(request):
         is_admin = request.POST.get('is_admin') == 'on'
         if form.is_valid():
             user = form.save(commit=False)
+            # SECURITY: Only allow Superusers to grant admin rights
             if is_admin:
-                user.is_staff = True
-                user.is_superuser = True
+                if request.user.is_superuser:
+                    user.is_staff = True
+                    user.is_superuser = True
+                else:
+                    messages.error(request, "Only Superadmins can grant admin access.")
+                    return redirect('dashboard:users')
             user.save()
             messages.success(request, 'New user account created successfully!')
             return redirect('dashboard:users')
@@ -87,6 +92,12 @@ def add_user(request):
 def edit_user(request, pk):
     user_to_edit = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
+        # SECURITY: Prevent standard staff from promoting users
+        if not request.user.is_superuser:
+            if request.POST.get('is_superuser') or request.POST.get('is_staff'):
+                messages.error(request, "You do not have permission to change admin roles.")
+                return redirect('dashboard:users')
+        
         form = UserChangeForm(request.POST, instance=user_to_edit)
         if form.is_valid():
             form.save()
