@@ -1,32 +1,64 @@
 {% extends 'dashboard/base.html' %}
+{% block title %}ID Management{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>ID Management</h2>
-    
-    <div class="row">
-        <div class="col-md-6">
-            <h3>Pending</h3>
-            <table class="table table-warning">
-                <thead><tr><th>Name</th><th>ID Type</th></tr></thead>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>ID Management</h2>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <!-- Table id must match the script below -->
+            <table id="idTable" class="table table-hover align-middle w-100">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>ID Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for s in pending_list %}
-                    <tr><td>{{ s.first_name }} {{ s.last_name }}</td><td>{{ s.id_type }}</td></tr>
+                    <tr>
+                        <td>{{ s.first_name }} {{ s.last_name }}</td>
+                        <td>{{ s.id_type }}</td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td>
+                            <a href="{% url 'dashboard:mark_id_processed' s.pk %}" class="btn btn-sm btn-success">Mark Processed</a>
+                        </td>
+                    </tr>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="col-md-6">
-            <h3>Processed</h3>
-            <table class="table table-success">
-                <thead><tr><th>Name</th><th>ID Type</th></tr></thead>
-                <tbody>
                     {% for s in processed_list %}
-                    <tr><td>{{ s.first_name }} {{ s.last_name }}</td><td>{{ s.id_type }}</td></tr>
+                    <tr>
+                        <td>{{ s.first_name }} {{ s.last_name }}</td>
+                        <td>{{ s.id_type }}</td>
+                        <td><span class="badge bg-success">Processed</span></td>
+                        <td class="text-muted">Completed</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<!-- DataTables CSS & JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#idTable').DataTable({
+            "order": [[ 2, "asc" ]], // Sort by Status: Pending usually sorts first
+            "paging": true,
+            "pageLength": 25,
+            "deferRender": true, // Critical for performance with large datasets
+            "language": { "search": "Search Names:" }
+        });
+    });
+</script>
 {% endblock %}

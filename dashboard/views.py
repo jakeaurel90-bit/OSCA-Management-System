@@ -8,7 +8,19 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import SeniorCitizen, Barangay, MemberLog
+# --- Custom Form to remove User Permissions/Admin fields ---
+from django.contrib.auth.forms import UserChangeForm
 
+class CustomUserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Manually remove all password-related fields from the form instance
+        for field in ['password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions']:
+            if field in self.fields:
+                del self.fields[field]
 # --- Helper ---
 def create_log(user, action, details):
     MemberLog.objects.create(user=user, action=action, details=details)
@@ -30,6 +42,7 @@ def login_view(request):
     return render(request, 'dashboard/login.html')
 
 def register_view(request):
+    # Public registration currently open; change logic if you wish to restrict
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -50,13 +63,14 @@ def logout_view(request):
 @login_required(login_url='dashboard:login')
 def edit_profile(request):
     if request.method == 'POST':
-        form = UserChangeForm(request.POST, instance=request.user)
+        form = CustomUserChangeForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('dashboard:dashboard')
     else:
-        form = UserChangeForm(instance=request.user)
+        form = CustomUserChangeForm(instance=request.user)
+    
     return render(request, 'dashboard/edit_profile.html', {'form': form})
 
 @login_required(login_url='dashboard:login')
@@ -72,7 +86,6 @@ def add_user(request):
         is_admin = request.POST.get('is_admin') == 'on'
         if form.is_valid():
             user = form.save(commit=False)
-            # SECURITY: Only allow Superusers to grant admin rights
             if is_admin:
                 if request.user.is_superuser:
                     user.is_staff = True
@@ -92,19 +105,18 @@ def add_user(request):
 def edit_user(request, pk):
     user_to_edit = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
-        # SECURITY: Prevent standard staff from promoting users
         if not request.user.is_superuser:
             if request.POST.get('is_superuser') or request.POST.get('is_staff'):
                 messages.error(request, "You do not have permission to change admin roles.")
                 return redirect('dashboard:users')
         
-        form = UserChangeForm(request.POST, instance=user_to_edit)
+        form = CustomUserChangeForm(request.POST, instance=user_to_edit)
         if form.is_valid():
             form.save()
             messages.success(request, f"User {user_to_edit.username} updated successfully.")
             return redirect('dashboard:users')
     else:
-        form = UserChangeForm(instance=user_to_edit)
+        form = CustomUserChangeForm(instance=user_to_edit)
     return render(request, 'dashboard/edit_user.html', {'form': form, 'user_to_edit': user_to_edit})
 
 @login_required(login_url='dashboard:login')
@@ -265,25 +277,23 @@ def settings_view(request):
 
 @login_required(login_url='dashboard:login')
 def reports_view(request):
+    # This query fetches all seniors, which the template uses
     all_seniors = SeniorCitizen.objects.filter(is_deleted=False)
     
-    # Corrected beneficiaries calculation
-    active_beneficiaries_count = all_seniors.filter(status='ACTIVE').filter(
-        Q(has_pension=True) | 
-        Q(has_medical_assistance=True) | 
-        Q(has_philhealth=True) | 
-        Q(has_sss=True)
-    ).count()
-
     context = {
+        'all_seniors': all_seniors,  # <--- Ensure this variable is passed!
         'total_seniors': all_seniors.count(),
         'active_seniors': all_seniors.filter(status='ACTIVE').count(),
         'inactive_seniors': all_seniors.filter(status='INACTIVE').count(),
         'deceased_seniors': all_seniors.filter(status='DECEASED').count(),
-        'active_beneficiaries': active_beneficiaries_count,
+        'active_beneficiaries': all_seniors.filter(status='ACTIVE').filter(
+            Q(has_pension=True) | Q(has_medical_assistance=True) | 
+            Q(has_philhealth=True) | Q(has_sss=True)
+        ).count(),
         'barangay_stats': Barangay.objects.exclude(name__icontains="txtSQL").annotate(
             senior_count=Count('residents', filter=Q(residents__is_deleted=False))
         ),
-        'birthday_celebrants': all_seniors.filter(birthdate__month=date.today().month).order_by('birthdate__day')
+        'birthday_celebrants': all_seniors.filter(birthdate__month=date.today().month).order_by('birthdate__day'),
+        'today': timezone.now().strftime("%B %d, %Y")
     }
     return render(request, 'dashboard/reports.html', context)

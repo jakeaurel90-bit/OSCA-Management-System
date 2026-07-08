@@ -1,43 +1,76 @@
 {% extends 'dashboard/base.html' %}
+{% block title %}Benefits & Services{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <h2 class="mb-4">Benefits & Services</h2>
-    <div class="card shadow-sm p-3">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Pension</th>
-                    <th>Medical</th>
-                    <th>PhilHealth</th>
-                    <th>SSS</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in seniors %}
-                <tr>
-                    <td><strong>{{ s.first_name }} {{ s.last_name }}</strong></td>
-                    
-                    <!-- Benefit Statuses -->
-                    <td>{% if s.has_pension %}<span class="text-success">●</span>{% else %}<span class="text-danger">○</span>{% endif %}</td>
-                    <td>{% if s.has_medical_assistance %}<span class="text-success">●</span>{% else %}<span class="text-danger">○</span>{% endif %}</td>
-                    <td>{% if s.has_philhealth %}<span class="text-success">●</span>{% else %}<span class="text-danger">○</span>{% endif %}</td>
-                    <td>{% if s.has_sss %}<span class="text-success">●</span>{% else %}<span class="text-danger">○</span>{% endif %}</td>
-                    
-                    <!-- Toggle Actions -->
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'pension' %}" class="btn btn-outline-primary">Pen</a>
-                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'medical' %}" class="btn btn-outline-success">Med</a>
-                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'philhealth' %}" class="btn btn-outline-info">Phil</a>
-                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'sss' %}" class="btn btn-outline-warning">SSS</a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Benefits & Services</h2>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <table id="benefitsTable" class="table table-hover align-middle w-100">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Pension</th>
+                        <th>Medical</th>
+                        <th>PhilHealth</th>
+                        <th>SSS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in seniors %}
+                    <tr>
+                        <td><strong>{{ s.first_name }} {{ s.last_name }}</strong></td>
+                        
+                        <!-- Toggle Buttons -->
+                        <td>
+                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'pension' %}" 
+                               class="btn btn-sm {% if s.has_pension %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                               {{ s.has_pension|yesno:"Active,Inactive" }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'medical' %}" 
+                               class="btn btn-sm {% if s.has_medical_assistance %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                               {{ s.has_medical_assistance|yesno:"Active,Inactive" }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'philhealth' %}" 
+                               class="btn btn-sm {% if s.has_philhealth %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                               {{ s.has_philhealth|yesno:"Active,Inactive" }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'dashboard:toggle_benefit' s.pk 'sss' %}" 
+                               class="btn btn-sm {% if s.has_sss %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                               {{ s.has_sss|yesno:"Active,Inactive" }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<!-- DataTables CSS & JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#benefitsTable').DataTable({
+            "paging": true,
+            "pageLength": 25,
+            "deferRender": true, 
+            "language": { "search": "Search Seniors:" }
+        });
+    });
+</script>
 {% endblock %}

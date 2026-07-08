@@ -1,5 +1,6 @@
 from django.urls import path
 from django.views.generic.base import RedirectView
+from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = 'dashboard'
@@ -9,6 +10,10 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('', views.dashboard_view, name='dashboard'),
+    
+    # --- Password Management ---
+    path('password-change/', auth_views.PasswordChangeView.as_view(template_name='dashboard/password_change.html'), name='password_change'),
+    path('password-change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='dashboard/password_change_done.html'), name='password_change_done'),
     
     # Senior Management
     path('seniors/', views.list_seniors, name='list_seniors'),

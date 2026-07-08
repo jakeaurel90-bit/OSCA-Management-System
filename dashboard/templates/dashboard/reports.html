@@ -5,34 +5,13 @@
 <style>
     /* Print-specific styles */
     @media print {
-        /* Hide UI elements */
-        .no-print, .btn, .d-print-none {
-            display: none !important;
-        }
-
-        /* Ensure only the report is visible */
-        body * {
-            visibility: hidden;
-        }
-        #printable-report, #printable-report * {
-            visibility: visible;
-        }
-        #printable-report {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-
-        /* Show the print header */
-        .print-only {
-            display: block !important;
-        }
+        .no-print, .btn, .d-print-none { display: none !important; }
+        body * { visibility: hidden; }
+        #printable-report, #printable-report * { visibility: visible; }
+        #printable-report { position: absolute; left: 0; top: 0; width: 100%; }
+        .print-only { display: block !important; }
     }
-    
-    .print-only {
-        display: none;
-    }
+    .print-only { display: none; }
 </style>
 
 <div class="container-fluid p-4">
@@ -49,6 +28,7 @@
             <p>Summary Statistical Report - {{ today }}</p>
         </div>
 
+        <!-- Dashboard Stat Cards -->
         <div class="row mb-4">
             <div class="col-md-2"><div class="card p-3 bg-primary text-white text-center"><h6>Total</h6><h3>{{ total_seniors }}</h3></div></div>
             <div class="col-md-2"><div class="card p-3 bg-success text-white text-center"><h6>Active</h6><h3>{{ active_seniors }}</h3></div></div>
@@ -62,9 +42,7 @@
                 <div class="card p-4 shadow-sm border-0">
                     <h5 class="mb-3">Per Barangay</h5>
                     <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr><th>Barangay</th><th class="text-center">Count</th></tr>
-                        </thead>
+                        <thead class="table-light"><tr><th>Barangay</th><th class="text-center">Count</th></tr></thead>
                         <tbody>
                             {% for stat in barangay_stats %}
                             <tr>
@@ -85,6 +63,33 @@
             </div>
         </div>
 
+        <!-- Automated Beneficiary Benefit Table -->
+        <div class="card mt-4 shadow-sm border-0 p-4">
+            <h5>Active Beneficiaries & Benefits Received</h5>
+            <table class="table table-striped mt-3">
+                <thead class="table-light">
+                    <tr><th>Name</th><th>Barangay</th><th>Benefits Received</th></tr>
+                </thead>
+                <tbody>
+                    {% for s in all_seniors %}
+                    {% if s.status == 'ACTIVE' %}
+                    <tr>
+                        <td><strong>{{ s.first_name }} {{ s.last_name }}</strong></td>
+                        <td>{{ s.barangay.name }}</td>
+                        <td>
+                            {% if s.has_pension %}Pension, {% endif %}
+                            {% if s.has_medical_assistance %}Medical, {% endif %}
+                            {% if s.has_philhealth %}PhilHealth, {% endif %}
+                            {% if s.has_sss %}SSS{% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Birthday Celebrants -->
         <div class="card mt-4 shadow-sm border-0 p-4">
             <h5>Birthday Celebrants (This Month)</h5>
             <ul class="list-unstyled">
@@ -98,7 +103,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Ensure chart exists before rendering
     const ctx = document.getElementById('barangayChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
