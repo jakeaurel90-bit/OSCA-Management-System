@@ -25,25 +25,23 @@ class SeniorCitizenManager(models.Manager):
         return super().get_queryset().filter(is_deleted=False)
 
 class SeniorCitizen(models.Model):
+    # Choices
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
     STATUS_CHOICES = [('ACTIVE', 'Active'), ('INACTIVE', 'Inactive'), ('DECEASED', 'Deceased')]
     ID_STATUS_CHOICES = [('PENDING', 'Pending'), ('PROCESSED', 'Processed')]
-    
-    # Updated: Changed 'SENIOR' choice to 'PENSION'
     ID_TYPE_CHOICES = [
-        ('SSS', 'SSS'),
-        ('PHILHEALTH', 'PhilHealth'),
-        ('PENSION', 'Pension'), 
-        ('MEDICAL', 'Medical'),
+        ('SSS', 'SSS'), ('PHILHEALTH', 'PhilHealth'),
+        ('PENSION', 'Pension'), ('MEDICAL', 'Medical'),
     ]
-    
     CIVIL_STATUS_CHOICES = [
         ('Single', 'Single'), ('Married', 'Married'), 
         ('Widowed', 'Widowed'), ('Separated', 'Separated')
     ]
     
+    # Validation
     phone_validator = RegexValidator(regex=r'^\+63[0-9]{10}$', message="Format: +639XXXXXXXXX")
 
+    # Fields
     first_name = models.CharField(max_length=20)
     middle_initial = models.CharField(max_length=2, blank=True, null=True)
     last_name = models.CharField(max_length=20)
@@ -57,6 +55,7 @@ class SeniorCitizen(models.Model):
     phone_number = models.CharField(max_length=13, validators=[phone_validator])
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='residents')
     
+    # Statuses & Flags
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ACTIVE', blank=True, null=True)
     date_registered = models.DateField(default=timezone.now, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
@@ -68,8 +67,22 @@ class SeniorCitizen(models.Model):
     has_philhealth = models.BooleanField(default=False)
     has_medical_assistance = models.BooleanField(default=False)
 
+    # Managers
     objects = SeniorCitizenManager()
     all_objects = models.Manager()
+
+    def get_active_id_types(self):
+        types = []
+        if self.has_pension: types.append("Pension")
+        if self.has_sss: types.append("SSS")
+        if self.has_philhealth: types.append("PhilHealth")
+        if self.has_medical_assistance: types.append("Medical")
+        
+        if not types:
+            return "None"
+        if len(types) == 4:
+            return "All"
+        return ", ".join(types)
 
     def __str__(self): return f"{self.last_name}, {self.first_name}"
 

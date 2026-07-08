@@ -8,20 +8,22 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import SeniorCitizen, Barangay, MemberLog
-# --- Custom Form to remove User Permissions/Admin fields ---
-from django.contrib.auth.forms import UserChangeForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
+# --- Custom Form ---
 class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         fields = ['username', 'email', 'first_name', 'last_name']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Manually remove all password-related fields from the form instance
         for field in ['password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions']:
             if field in self.fields:
                 del self.fields[field]
-# --- Helper ---
+
+# --- Helpers ---
 def create_log(user, action, details):
     MemberLog.objects.create(user=user, action=action, details=details)
 
@@ -30,8 +32,7 @@ def is_staff(user):
 
 # --- Auth ---
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard:dashboard')
+    if request.user.is_authenticated: return redirect('dashboard:dashboard')
     if request.method == 'POST':
         user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
         if user:
@@ -42,15 +43,13 @@ def login_view(request):
     return render(request, 'dashboard/login.html')
 
 def register_view(request):
-    # Public registration currently open; change logic if you wish to restrict
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Account created successfully!")
             return redirect('dashboard:login')
-    else:
-        form = UserCreationForm()
+    else: form = UserCreationForm()
     return render(request, 'dashboard/register.html', {'form': form})
 
 def logout_view(request):
@@ -68,9 +67,7 @@ def edit_profile(request):
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('dashboard:dashboard')
-    else:
-        form = CustomUserChangeForm(instance=request.user)
-    
+    else: form = CustomUserChangeForm(instance=request.user)
     return render(request, 'dashboard/edit_profile.html', {'form': form})
 
 @login_required(login_url='dashboard:login')
@@ -88,16 +85,11 @@ def add_user(request):
             user = form.save(commit=False)
             if is_admin:
                 if request.user.is_superuser:
-                    user.is_staff = True
-                    user.is_superuser = True
+                    user.is_staff = True; user.is_superuser = True
                 else:
-                    messages.error(request, "Only Superadmins can grant admin access.")
-                    return redirect('dashboard:users')
-            user.save()
-            messages.success(request, 'New user account created successfully!')
-            return redirect('dashboard:users')
-    else:
-        form = UserCreationForm()
+                    messages.error(request, "Only Superadmins can grant admin access."); return redirect('dashboard:users')
+            user.save(); messages.success(request, 'New user account created successfully!'); return redirect('dashboard:users')
+    else: form = UserCreationForm()
     return render(request, 'dashboard/add_user.html', {'form': form})
 
 @login_required(login_url='dashboard:login')
@@ -105,46 +97,32 @@ def add_user(request):
 def edit_user(request, pk):
     user_to_edit = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
-        if not request.user.is_superuser:
-            if request.POST.get('is_superuser') or request.POST.get('is_staff'):
-                messages.error(request, "You do not have permission to change admin roles.")
-                return redirect('dashboard:users')
-        
+        if not request.user.is_superuser and (request.POST.get('is_superuser') or request.POST.get('is_staff')):
+            messages.error(request, "You do not have permission to change admin roles."); return redirect('dashboard:users')
         form = CustomUserChangeForm(request.POST, instance=user_to_edit)
         if form.is_valid():
-            form.save()
-            messages.success(request, f"User {user_to_edit.username} updated successfully.")
-            return redirect('dashboard:users')
-    else:
-        form = CustomUserChangeForm(instance=user_to_edit)
+            form.save(); messages.success(request, f"User {user_to_edit.username} updated successfully."); return redirect('dashboard:users')
+    else: form = CustomUserChangeForm(instance=user_to_edit)
     return render(request, 'dashboard/edit_user.html', {'form': form, 'user_to_edit': user_to_edit})
 
 @login_required(login_url='dashboard:login')
 @user_passes_test(is_staff, login_url='dashboard:dashboard')
 def delete_user(request, pk):
     user_to_delete = get_object_or_404(User, pk=pk)
-    if user_to_delete == request.user:
-        messages.error(request, "You cannot delete your own account.")
-    else:
-        user_to_delete.delete()
-        messages.success(request, f"User {user_to_delete.username} deleted successfully.")
+    if user_to_delete == request.user: messages.error(request, "Cannot delete your own account.")
+    else: user_to_delete.delete(); messages.success(request, f"User {user_to_delete.username} deleted.")
     return redirect('dashboard:users')
 
-# --- Dashboard & Management ---
+# --- Senior Management & Soft Delete ---
 @login_required(login_url='dashboard:login')
 def dashboard_view(request):
     now = timezone.now()
     seniors = SeniorCitizen.objects.filter(is_deleted=False)
-    total = seniors.count()
-    active = seniors.filter(status='ACTIVE').count()
     context = {
-        'total': total,
-        'active': active,
-        'active_pct': (active/total * 100) if total > 0 else 0,
-        'inactive': seniors.filter(status='INACTIVE').count(),
-        'male': seniors.filter(gender='M').count(),
-        'female': seniors.filter(gender='F').count(),
-        'birthdays': seniors.filter(birthdate__month=now.month).count(),
+        'total': seniors.count(), 'active': seniors.filter(status='ACTIVE').count(),
+        'active_pct': (seniors.filter(status='ACTIVE').count()/seniors.count() * 100) if seniors.count() > 0 else 0,
+        'inactive': seniors.filter(status='INACTIVE').count(), 'male': seniors.filter(gender='M').count(),
+        'female': seniors.filter(gender='F').count(), 'birthdays': seniors.filter(birthdate__month=now.month).count(),
         'newly_registered': seniors.filter(date_registered__month=now.month, date_registered__year=now.year).count(),
         'barangay_data': list(seniors.values('barangay__name').annotate(count=Count('id')).order_by('-count')),
         'today': now.strftime("%B %d, %Y")
@@ -153,8 +131,7 @@ def dashboard_view(request):
 
 @login_required(login_url='dashboard:login')
 def list_seniors(request): 
-    seniors = SeniorCitizen.objects.filter(is_deleted=False).order_by('last_name', 'first_name')
-    return render(request, 'dashboard/list_seniors.html', {'seniors': seniors})
+    return render(request, 'dashboard/list_seniors.html', {'seniors': SeniorCitizen.objects.filter(is_deleted=False).order_by('last_name', 'first_name')})
 
 @login_required(login_url='dashboard:login')
 def add_senior(request):
@@ -164,25 +141,16 @@ def add_senior(request):
         if b_id:
             barangay_obj = get_object_or_404(Barangay, id=b_id)
             senior = SeniorCitizen.objects.create(
-                first_name=request.POST.get('first_name'),
-                middle_initial=request.POST.get('middle_initial'),
-                last_name=request.POST.get('last_name'),
-                suffix=request.POST.get('suffix'),
-                address=request.POST.get('address'),
-                civil_status=request.POST.get('civil_status'),
-                birthdate=request.POST.get('birthdate'),
-                age=request.POST.get('age'),
-                gender=request.POST.get('gender'),
-                date_registered=request.POST.get('date_registered'),
-                phone_number=request.POST.get('phone_number'), 
-                barangay=barangay_obj, 
-                status=request.POST.get('status', 'ACTIVE'),
-                id_status=request.POST.get('id_status', 'PENDING'),
-                id_type=request.POST.get('id_type', 'PENSION'),
-                has_pension='has_pension' in request.POST,
+                first_name=request.POST.get('first_name'), middle_initial=request.POST.get('middle_initial'),
+                last_name=request.POST.get('last_name'), suffix=request.POST.get('suffix'),
+                address=request.POST.get('address'), civil_status=request.POST.get('civil_status'),
+                birthdate=request.POST.get('birthdate'), age=request.POST.get('age'),
+                gender=request.POST.get('gender'), date_registered=request.POST.get('date_registered'),
+                phone_number=request.POST.get('phone_number'), barangay=barangay_obj,
+                status=request.POST.get('status', 'ACTIVE'), id_status=request.POST.get('id_status', 'PENDING'),
+                id_type=request.POST.get('id_type', 'PENSION'), has_pension='has_pension' in request.POST,
                 has_medical_assistance='has_medical_assistance' in request.POST,
-                has_philhealth='has_philhealth' in request.POST,
-                has_sss='has_sss' in request.POST
+                has_philhealth='has_philhealth' in request.POST, has_sss='has_sss' in request.POST
             )
             create_log(request.user, 'CREATE', f"Registered: {senior.first_name} {senior.last_name}")
             return redirect('dashboard:list_seniors')
@@ -195,42 +163,56 @@ def edit_senior(request, pk):
     if request.method == 'POST':
         b_id = request.POST.get('barangay')
         barangay_obj = get_object_or_404(Barangay, id=b_id)
-        senior.first_name = request.POST.get('first_name')
-        senior.middle_initial = request.POST.get('middle_initial')
-        senior.last_name = request.POST.get('last_name')
-        senior.suffix = request.POST.get('suffix')
-        senior.address = request.POST.get('address')
-        senior.civil_status = request.POST.get('civil_status')
-        senior.birthdate = request.POST.get('birthdate')
-        senior.age = request.POST.get('age')
-        senior.gender = request.POST.get('gender')
-        senior.date_registered = request.POST.get('date_registered')
-        senior.phone_number = request.POST.get('phone_number')
-        senior.barangay = barangay_obj
-        senior.status = request.POST.get('status')
-        senior.id_status = request.POST.get('id_status')
-        senior.id_type = request.POST.get('id_type')
-        senior.has_pension = 'has_pension' in request.POST
+        senior.first_name = request.POST.get('first_name'); senior.middle_initial = request.POST.get('middle_initial')
+        senior.last_name = request.POST.get('last_name'); senior.suffix = request.POST.get('suffix')
+        senior.address = request.POST.get('address'); senior.civil_status = request.POST.get('civil_status')
+        senior.birthdate = request.POST.get('birthdate'); senior.age = request.POST.get('age')
+        senior.gender = request.POST.get('gender'); senior.date_registered = request.POST.get('date_registered')
+        senior.phone_number = request.POST.get('phone_number'); senior.barangay = barangay_obj
+        senior.status = request.POST.get('status'); senior.id_status = request.POST.get('id_status')
+        senior.id_type = request.POST.get('id_type'); senior.has_pension = 'has_pension' in request.POST
         senior.has_medical_assistance = 'has_medical_assistance' in request.POST
-        senior.has_philhealth = 'has_philhealth' in request.POST
-        senior.has_sss = 'has_sss' in request.POST
-        senior.save()
-        create_log(request.user, 'UPDATE', f"Edited: {senior.first_name} {senior.last_name}")
+        senior.has_philhealth = 'has_philhealth' in request.POST; senior.has_sss = 'has_sss' in request.POST
+        senior.save(); create_log(request.user, 'UPDATE', f"Edited: {senior.first_name} {senior.last_name}")
         return redirect('dashboard:list_seniors')
     return render(request, 'dashboard/edit_senior.html', {'senior': senior, 'barangays': barangays})
 
+# --- Senior Management: FORCE SOFT DELETE ---
+from django.shortcuts import get_object_or_404 # Ensure this is imported
+
+@login_required(login_url='dashboard:login')
+def permanent_delete(request, pk):
+    # Use all_objects to find the record even if it is currently 'deleted'
+    senior = get_object_or_404(SeniorCitizen.all_objects, pk=pk)
+    senior.delete()
+    messages.success(request, f"Record deleted permanently.")
+    return redirect('dashboard:settings')
+
+@login_required(login_url='dashboard:login')
+def permanent_delete_all(request):
+    # Get all records marked as deleted
+    deleted_seniors = SeniorCitizen.all_objects.filter(is_deleted=True)
+    count = deleted_seniors.count()
+    deleted_seniors.delete()
+    messages.success(request, f"Successfully purged {count} records.")
+    return redirect('dashboard:settings')
+
 @login_required(login_url='dashboard:login')
 def delete_senior(request, pk):
-    senior = get_object_or_404(SeniorCitizen, pk=pk)
+    # Use all_objects to find the record even if it's already 'deleted'
+    senior = get_object_or_404(SeniorCitizen.all_objects, pk=pk)
+    
+    # Toggle the flag
     senior.is_deleted = True
-    senior.save()
-    create_log(request.user, 'DELETE', f"Deleted: {senior.last_name}")
-    return redirect('dashboard:list_seniors')
+    senior.save(update_fields=['is_deleted'])
+    
+    messages.success(request, f"Record for {senior.last_name} moved to recycle bin.")
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard:list_seniors'))
 
 @login_required(login_url='dashboard:login')
 def restore_senior(request, pk):
     senior = get_object_or_404(SeniorCitizen, pk=pk)
-    senior.is_deleted = False
+    senior.is_deleted = True
     senior.save()
     return redirect('dashboard:settings')
 
@@ -240,13 +222,23 @@ def id_management_view(request):
         'pending_list': SeniorCitizen.objects.filter(id_status='PENDING', is_deleted=False),
         'processed_list': SeniorCitizen.objects.filter(id_status='PROCESSED', is_deleted=False)
     })
+    
+@login_required(login_url='dashboard:login')
+def restore_senior(request, pk):
+    # Retrieve the senior record (using all_objects because it's currently 'deleted')
+    senior = get_object_or_404(SeniorCitizen.all_objects, pk=pk)
+    
+    # Flip the flag back to False to restore it
+    senior.is_deleted = False
+    senior.save(update_fields=['is_deleted'])
+    
+    messages.success(request, f"Record for {senior.last_name} restored successfully.")
+    return redirect('dashboard:settings')
 
 @login_required(login_url='dashboard:login')
 def mark_id_processed(request, pk):
     senior = get_object_or_404(SeniorCitizen, pk=pk)
-    senior.id_status = 'PROCESSED'
-    senior.save()
-    return redirect('dashboard:id_management')
+    senior.id_status = 'PROCESSED'; senior.save(); return redirect('dashboard:id_management')
 
 @login_required(login_url='dashboard:login')
 def benefits_view(request): 
@@ -259,8 +251,7 @@ def toggle_benefit(request, pk, benefit_type):
     elif benefit_type == 'medical': senior.has_medical_assistance = not senior.has_medical_assistance
     elif benefit_type == 'philhealth': senior.has_philhealth = not senior.has_philhealth
     elif benefit_type == 'sss': senior.has_sss = not senior.has_sss
-    senior.save()
-    create_log(request.user, 'UPDATE_BENEFIT', f"Toggled {benefit_type} for {senior.last_name}")
+    senior.save(); create_log(request.user, 'UPDATE_BENEFIT', f"Toggled {benefit_type} for {senior.last_name}")
     return redirect('dashboard:benefits')
 
 @login_required(login_url='dashboard:login')
@@ -271,17 +262,20 @@ def birthday_celebrants_view(request):
 def activity_log_view(request): 
     return render(request, 'dashboard/member_logs.html', {'logs': MemberLog.objects.all().order_by('-timestamp')})
 
+# --- Recycle Bin: FORCE FETCH ---
 @login_required(login_url='dashboard:login')
-def settings_view(request): 
-    return render(request, 'dashboard/settings.html', {'deleted_seniors': SeniorCitizen.objects.filter(is_deleted=True)})
-
+def settings_view(request):
+    # Query using all_objects to ensure we see the deleted ones
+    deleted_seniors = SeniorCitizen.all_objects.filter(is_deleted=True)
+    
+    return render(request, 'dashboard/settings.html', {
+        'deleted_seniors': deleted_seniors
+    })
 @login_required(login_url='dashboard:login')
 def reports_view(request):
-    # This query fetches all seniors, which the template uses
-    all_seniors = SeniorCitizen.objects.filter(is_deleted=False)
-    
+    all_seniors = SeniorCitizen.objects.filter(is_deleted=False).order_by('last_name', 'first_name')
     context = {
-        'all_seniors': all_seniors,  # <--- Ensure this variable is passed!
+        'all_seniors': all_seniors, 
         'total_seniors': all_seniors.count(),
         'active_seniors': all_seniors.filter(status='ACTIVE').count(),
         'inactive_seniors': all_seniors.filter(status='INACTIVE').count(),

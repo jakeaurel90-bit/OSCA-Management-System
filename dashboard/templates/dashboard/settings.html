@@ -1,11 +1,11 @@
 {% extends 'dashboard/base.html' %}
 {% block content %}
 <div class="container-fluid p-4">
-    <h2 class="mb-4">System Settings</h2>
+    <h2 class="fw-bold mb-4">System Settings</h2>
     
-    <div class="card mb-5 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">About the System</h4>
+    <div class="card mb-5 shadow-sm border-0">
+        <div class="card-header bg-primary text-white border-0 p-3">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> About the System</h5>
         </div>
         <div class="card-body">
             <p><strong>OSCA Management System</strong></p>
@@ -15,35 +15,58 @@
         </div>
     </div>
 
-    <h4 class="mb-3">Recycle Bin (Restoration Area)</h4>
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered align-middle">
-            <thead class="table-secondary">
-                <tr>
-                    <th>Name</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in deleted_seniors %}
-                <tr>
-                    <td>{{ s.last_name }}, {{ s.first_name }}</td>
-                    <td>
-                        <form action="{% url 'dashboard:restore_senior' s.pk %}" method="POST">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-success">
-                                <i class="bi bi-arrow-counterclockwise"></i> Restore
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="text-center text-muted">No deleted records found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-danger m-0"><i class="bi bi-trash"></i> Recycle Bin (Restoration Area)</h4>
+        
+        {% if deleted_seniors %}
+        <form action="{% url 'dashboard:permanent_delete_all' %}" method="POST" 
+              onsubmit="return confirm('WARNING: This will permanently delete ALL items in the recycle bin. This action cannot be undone. Continue?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">
+                <i class="bi bi-trash-fill"></i> Delete All Permanently
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Senior Citizen Name</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in deleted_seniors %}
+                    <tr>
+                        <td class="ps-4"><strong>{{ s.last_name }}, {{ s.first_name }}</strong></td>
+                        <td class="text-center">
+                            <form action="{% url 'dashboard:restore_senior' s.pk %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-success me-2">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                            </form>
+
+                            <form action="{% url 'dashboard:permanent_delete' s.pk %}" method="POST" class="d-inline"
+                                  onsubmit="return confirm('WARNING: This will delete this record permanently. Continue?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash3"></i> Delete Forever
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center py-4 text-muted">Recycle bin is empty.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
